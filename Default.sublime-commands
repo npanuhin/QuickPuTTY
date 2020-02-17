@@ -1,0 +1,19 @@
+[
+    {
+        "caption": "QuickPuTTY: Open PuTTY",
+        "command": "quickputty_open"
+    },
+    {
+        "caption": "QuickPuTTY: Create new session",
+        "command": "quickputty_new"
+    },
+    {
+        "caption": "QuickPuTTY: Remove session",
+        "command": "quickputty_remove"
+    },
+    {
+        "caption": "QuickPuTTY: Manage sessions",
+        "command": "open_file",
+        "args": {"file": "${packages}/QuickPuTTY/sessions.json"}
+    }
+]

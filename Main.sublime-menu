@@ -1,0 +1,54 @@
+[
+	{
+		"caption": "Preferences",
+		"children":
+		[
+			{
+				"caption": "Package Settings",
+				"children":
+				[
+					{
+						"args":
+						{
+							"base_file": "${packages}/QuickPuTTY/QuickPuTTY.sublime-settings",
+							"default": "{\n\t$0\n}\n"
+						},
+						"caption": "QuickPuTTY Settings",
+						"command": "edit_settings"
+					}
+				],
+				"id": "package-settings",
+				"mnemonic": "P"
+			}
+		],
+		"id": "preferences",
+		"mnemonic": "n"
+	},
+	{
+		"caption": "PuTTY",
+		"children":
+		[
+			{
+				"caption": "New session",
+				"command": "quickputty_new"
+			},
+			{
+				"args":
+				{
+					"file": "${packages}/QuickPuTTY/sessions.json"
+				},
+				"caption": "Manage sessions",
+				"command": "open_file"
+			},
+			{
+				"caption": "Remove session",
+				"command": "quickputty_remove"
+			},
+			{
+				"caption": "-"
+			}
+		],
+		"id": "putty",
+		"mnemonic": "P"
+	}
+]

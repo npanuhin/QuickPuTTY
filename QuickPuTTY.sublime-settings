@@ -1,0 +1,4 @@
+{
+	// This command is used, to run PuTTY
+	"PuTTY_run_command" : "putty"
+}
