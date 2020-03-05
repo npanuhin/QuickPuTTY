@@ -44,6 +44,6 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 
 -------------------------------------------
 
-Copyright © 2020 Nikita Paniukhin
+Copyright &copy; 2020 Nikita Paniukhin
 
 License: [MIT](http://n-panuhin.info/license.html "Visit n-panuhin.info/license")
