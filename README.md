@@ -8,6 +8,8 @@
 
 *QuickPuTTY* is a plugin for Sublime Text 3 that allows you to save SSH sessions for quick access to them.
 
+**Warning!** Usernames and passwords are stored in plain text. Make sure no one can access them.
+
 ## Installation
 
 The plugin can be installed via [Package Control](https://packagecontrol.io "Visit packagecontrol.io"):
@@ -36,7 +38,7 @@ The plugin can be installed via [Package Control](https://packagecontrol.io "Vis
 -------------------------------------------
 
 The plugin was tested on `Windows 10 (1809) x64` and `Ubuntu 18.04.03`.
-If you find a bug, you are very welcome to contact me on [n-panuhin.info](https://n-panuhin.info "Visit n-panuhin.io")
+If you have found a bug or mistake, you are very welcome to contact me on [n-panuhin.info](https://n-panuhin.info "Visit n-panuhin.io")
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
 
