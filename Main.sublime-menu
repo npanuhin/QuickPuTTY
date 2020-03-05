@@ -35,7 +35,7 @@
 			{
 				"args":
 				{
-					"file": "${packages}/QuickPuTTY/sessions.json"
+					"file": "${packages}/User/QuickPuTTY/sessions.json"
 				},
 				"caption": "Manage sessions",
 				"command": "open_file"

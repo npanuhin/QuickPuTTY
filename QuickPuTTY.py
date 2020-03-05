@@ -1,17 +1,11 @@
 import sublime
 import sublime_plugin
 from subprocess import Popen, PIPE
-from os.path import join as os_join, normpath as os_normpath
+import os
 from re import match as re_match
 
-
-def mkpath(*paths):
-    return os_normpath(os_join(*paths))
-
-
 PACKAGE_NAME = "QuickPuTTY"
-SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "QuickPuTTY.sublime-settings")
-SESSION_FILE_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "sessions.json")
+
 MSG = {
     "cancel": "QuickPuTTY: Canceled",
     "reload": "QuickPuTTY: Sessions reloaded",
@@ -21,7 +15,12 @@ MSG = {
     "wrong_port": "Server port must be a natural number.",
     "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY> New session\" to add one!"
 }
+
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
+
+
+def mkpath(*paths):
+    return os.path.normpath(os.path.join(*paths))
 
 
 def runCommand(command, result=False):
@@ -79,8 +78,7 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
 class QuickputtyNew(sublime_plugin.WindowCommand):
 
     def run(self):
-        self.sessions_path = mkpath(sublime.packages_path(), PACKAGE_NAME, "sessions.json")
-        with open(self.sessions_path, "r", encoding="utf-8") as file:
+        with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
 
         self.new_session = {
@@ -160,7 +158,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         self.sessions[name] = self.new_session
 
         # Saving to "sessions.json"
-        with open(self.sessions_path, "w", encoding="utf-8") as file:
+        with open(SESSION_FILE_PATH, "w", encoding="utf-8") as file:
             file.write(sublime.encode_value(self.sessions, True))
 
         # Writing to sublime-menu file
@@ -170,9 +168,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 class QuickputtyRemove(sublime_plugin.WindowCommand):
 
     def run(self):
-        self.sessions_path = mkpath(sublime.packages_path(), PACKAGE_NAME, "sessions.json")
-
-        with open(self.sessions_path, "r", encoding="utf-8") as file:
+        with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
         if not self.sessions:
             sublime.message_dialog(MSG["no_sessions"])
@@ -196,7 +192,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             print(MSG["remove"].format(session_name=name))
 
             # Saving to "sessions.json"
-            with open(self.sessions_path, "w", encoding="utf-8") as file:
+            with open(SESSION_FILE_PATH, "w", encoding="utf-8") as file:
                 file.write(sublime.encode_value(self.sessions, True))
 
             makeSessionMenuFile(self.sessions)
@@ -221,3 +217,30 @@ class Sessions(sublime_plugin.EventListener):
                 makeSessionMenuFile(sublime.decode_value(file.read().strip()))
             print(MSG["reload"])
             # sublime.status_message(MSG["reload"])
+
+
+def plugin_loaded():
+    global USER_DATA_PATH
+    global SETTINGS_PATH
+    global SESSION_FILE_PATH
+    global USER_PACKAGE_PATH
+
+    USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
+    USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, "QuickPuTTY")
+    SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "QuickPuTTY.sublime-settings")
+    SESSION_FILE_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
+
+    # Creating "User file"
+    if not os.path.isdir(USER_PACKAGE_PATH):
+        os.mkdir(mkpath(USER_PACKAGE_PATH))
+
+    # (Re-)Creating file for storing sessions
+    if not os.path.isfile(SESSION_FILE_PATH):
+        with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
+            rewrite = (len(file.read().strip()) < 2)
+    else:
+        rewrite = True
+
+    if rewrite:
+        with open(SESSION_FILE_PATH, "w", encoding="utf-8") as file:
+            file.write(r"{}")
