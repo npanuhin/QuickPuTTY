@@ -18,6 +18,58 @@ MSG = {
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
+TEMPLATE_MENU = sublime.decode_value(r"""
+[
+    {
+        "caption": "Preferences",
+        "mnemonic": "n",
+        "id": "preferences",
+        "children": [
+            {
+                "caption": "Package Settings",
+                "mnemonic": "P",
+                "id": "package-settings",
+                "children": [
+                    {
+                        "caption": "QuickPuTTY Settings",
+                        "command": "edit_settings",
+                        "args": {
+                            "base_file": "${packages}/QuickPuTTY/QuickPuTTY.sublime-settings",
+                            "default": "{\n\t$0\n}\n"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "caption": "PuTTY",
+        "mnemonic": "P",
+        "id": "putty",
+        "children": [
+            // {
+            //     "caption": "Open PuTTY",
+            //     "command": "quickputty_open"
+            // },
+            // { "caption": "-" },
+            {
+                "caption": "New session",
+                "command": "quickputty_new"
+            },
+            {
+                "caption": "Manage sessions",
+                "command": "open_file",
+                "args": {"file": "${packages}/User/QuickPuTTY/sessions.json"},
+            },
+            {
+                "caption": "Remove session",
+                "command": "quickputty_remove"
+            },
+            { "caption": "-" }
+        ]
+    }
+]""")
+
 
 def mkpath(*paths):
     return os.path.normpath(os.path.join(*paths))
@@ -32,7 +84,7 @@ def runCommand(command, result=False):
 
 
 def makeSessionMenuFile(sessions):
-    with open(mkpath(sublime.packages_path(), PACKAGE_NAME, "template-menu.json"), "r", encoding="utf-8") as file:
+    with open(MENU_PATH, "r", encoding="utf-8") as file:
         menu_data = sublime.decode_value(file.read().strip())
 
     for name in sessions:
@@ -52,7 +104,7 @@ def makeSessionMenuFile(sessions):
 
         menu_data[1]["children"].append(to_write)
 
-    with open(mkpath(sublime.packages_path(), PACKAGE_NAME, "Main.sublime-menu"), "w", encoding="utf-8") as file:
+    with open(MENU_PATH, "w", encoding="utf-8") as file:
         file.write(sublime.encode_value(menu_data, True))
 
 
@@ -78,7 +130,7 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
 class QuickputtyNew(sublime_plugin.WindowCommand):
 
     def run(self):
-        with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
 
         self.new_session = {
@@ -158,7 +210,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         self.sessions[name] = self.new_session
 
         # Saving to "sessions.json"
-        with open(SESSION_FILE_PATH, "w", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
             file.write(sublime.encode_value(self.sessions, True))
 
         # Writing to sublime-menu file
@@ -168,7 +220,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 class QuickputtyRemove(sublime_plugin.WindowCommand):
 
     def run(self):
-        with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
         if not self.sessions:
             sublime.message_dialog(MSG["no_sessions"])
@@ -192,7 +244,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             print(MSG["remove"].format(session_name=name))
 
             # Saving to "sessions.json"
-            with open(SESSION_FILE_PATH, "w", encoding="utf-8") as file:
+            with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
                 file.write(sublime.encode_value(self.sessions, True))
 
             makeSessionMenuFile(self.sessions)
@@ -212,8 +264,8 @@ class Sessions(sublime_plugin.EventListener):
             view.set_read_only(True)
 
     def on_post_save_async(self, view):
-        if view.file_name() == SESSION_FILE_PATH:
-            with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
+        if view.file_name() == SESSIONS_PATH:
+            with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
                 makeSessionMenuFile(sublime.decode_value(file.read().strip()))
             print(MSG["reload"])
             # sublime.status_message(MSG["reload"])
@@ -221,26 +273,32 @@ class Sessions(sublime_plugin.EventListener):
 
 def plugin_loaded():
     global USER_DATA_PATH
-    global SETTINGS_PATH
-    global SESSION_FILE_PATH
     global USER_PACKAGE_PATH
+    global SETTINGS_PATH
+    global SESSIONS_PATH
+    global MENU_PATH
 
     USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
     USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, "QuickPuTTY")
     SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "QuickPuTTY.sublime-settings")
-    SESSION_FILE_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
+    SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
+    MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
     # Creating "User file"
     if not os.path.isdir(USER_PACKAGE_PATH):
         os.mkdir(mkpath(USER_PACKAGE_PATH))
 
     # (Re-)Creating file for storing sessions
-    if not os.path.isfile(SESSION_FILE_PATH):
-        with open(SESSION_FILE_PATH, "r", encoding="utf-8") as file:
+    if os.path.isfile(SESSIONS_PATH):
+        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             rewrite = (len(file.read().strip()) < 2)
     else:
         rewrite = True
 
     if rewrite:
-        with open(SESSION_FILE_PATH, "w", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
             file.write(r"{}")
+
+    if not os.path.isfile(MENU_PATH):
+        with open(MENU_PATH, "w", encoding="utf-8") as file:
+            file.write(sublime.encode_value(TEMPLATE_MENU, True))
