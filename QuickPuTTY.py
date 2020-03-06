@@ -13,7 +13,7 @@ MSG = {
     "already_has_name": "A session with that name already exists. Please choose a different name or change an existing one.",
     "empty_host": "Server host cannot be empty. Please enter the server IP address or URL.",
     "wrong_port": "Server port must be a natural number.",
-    "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY> New session\" to add one!"
+    "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!"
 }
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
@@ -84,8 +84,7 @@ def runCommand(command, result=False):
 
 
 def makeSessionMenuFile(sessions):
-    with open(MENU_PATH, "r", encoding="utf-8") as file:
-        menu_data = sublime.decode_value(file.read().strip())
+    data = TEMPLATE_MENU
 
     for name in sessions:
         to_write = {
@@ -102,17 +101,16 @@ def makeSessionMenuFile(sessions):
         if sessions[name]["password"]:
             to_write["args"]["password"] = sessions[name]["password"]
 
-        menu_data[1]["children"].append(to_write)
+        data[1]["children"].append(to_write)
 
     with open(MENU_PATH, "w", encoding="utf-8") as file:
-        file.write(sublime.encode_value(menu_data, True))
+        file.write(sublime.encode_value(data, True))
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
 
     def __init__(self, window):
-        settings = sublime.load_settings(PACKAGE_NAME)
-        self.run_command = settings.get("PuTTY_run_command", "putty")
+        self.run_command = sublime.load_settings(PACKAGE_NAME).get("PuTTY_run_command", "putty")
 
     def run(self, host=None, port=22, login="", password=""):
         if host is None:
@@ -133,13 +131,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
 
-        self.new_session = {
-            "name": None,
-            "host": None,
-            "port": None,
-            "login": None,
-            "password": None
-        }
+        self.new_session = {key: None for key in ("name", "host", "port", "login", "password")}
 
         self.window.show_input_panel("Session name", "", self.choose_host, 0, lambda: sublime.status_message(MSG["cancel"]))
 
@@ -222,13 +214,14 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
+
         if not self.sessions:
             sublime.message_dialog(MSG["no_sessions"])
             return
 
         self.session_names = [[name, self.sessions[name]["host"]] for name in self.sessions]
 
-        self.window.show_quick_panel(["{name} ({host})".format(name=name, host=host) for name, host in self.session_names], self.confirm)
+        self.window.show_quick_panel(["{} ({})".format(name, host) for name, host in self.session_names], self.confirm)
 
     def confirm(self, index):
         # If nothing is chosen
@@ -238,7 +231,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             return
 
         name, host = self.session_names[index]
-        if sublime.yes_no_cancel_dialog("Session \"{name}\" ({host}) will be deleted. Are you sure?".format(name=name, host=host)) == sublime.DIALOG_YES:
+        if sublime.yes_no_cancel_dialog("Session \"{}\" ({}) will be deleted. Are you sure?".format(name, host)) == sublime.DIALOG_YES:
             del self.sessions[name]
 
             print(MSG["remove"].format(session_name=name))
@@ -302,3 +295,8 @@ def plugin_loaded():
     if not os.path.isfile(MENU_PATH):
         with open(MENU_PATH, "w", encoding="utf-8") as file:
             file.write(sublime.encode_value(TEMPLATE_MENU, True))
+
+
+def plugin_unloaded():
+    if os.path.exists(MENU_PATH):
+        os.remove(MENU_PATH)
