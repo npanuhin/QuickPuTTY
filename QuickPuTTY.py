@@ -4,6 +4,9 @@ from subprocess import Popen, PIPE
 import os
 from re import match as re_match
 
+# If you want to edit default settings:
+# Go to "class Session > def on_load" and change "view.set_read_only(True)" to False (or comment this line)
+
 PACKAGE_NAME = "QuickPuTTY"
 
 MSG = {
@@ -47,6 +50,7 @@ TEMPLATE_MENU = sublime.decode_value(r"""
         "mnemonic": "P",
         "id": "putty",
         "children": [
+            // If you want, you can add an option to only run PuTTY (without connecting to certain server):
             // {
             //     "caption": "Open PuTTY",
             //     "command": "quickputty_open"
@@ -109,15 +113,14 @@ def makeSessionMenuFile(sessions):
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
 
-    def __init__(self, window):
-        self.run_command = sublime.load_settings(PACKAGE_NAME).get("PuTTY_run_command", "putty")
-
     def run(self, host=None, port=22, login="", password=""):
+        run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
+
         if host is None:
-            runCommand(self.run_command)
+            runCommand(run_command)
         else:
             runCommand("{putty} -ssh {host} -P {port}{login}{password}".format(
-                putty=self.run_command,
+                putty=run_command,
                 host=host,
                 port=port,
                 login=" -l " + str(login) if login else "",
@@ -300,3 +303,7 @@ def plugin_loaded():
 def plugin_unloaded():
     if os.path.exists(MENU_PATH):
         os.remove(MENU_PATH)
+
+    if sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("clear_on_remove", False):
+        os.remove(SESSIONS_PATH)
+        os.rmdir(USER_PACKAGE_PATH)

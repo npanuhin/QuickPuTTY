@@ -1,4 +1,7 @@
 {
 	// This command is used, to run PuTTY
-	"PuTTY_run_command" : "putty"
+	"PuTTY_run_command" : "putty",
+
+	// Clear all QuickPuTTY user files when the package is removed (Including saved sessions)
+	"clear_on_remove": false
 }
