@@ -3,6 +3,7 @@ import sublime_plugin
 from subprocess import Popen, PIPE
 import os
 from re import match as re_match
+from copy import deepcopy
 
 # If you want to edit default settings:
 # Go to "class Session > def on_load" and change "view.set_read_only(True)" to False (or comment this line)
@@ -21,7 +22,7 @@ MSG = {
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
-TEMPLATE_MENU = sublime.decode_value(r"""
+TEMPLATE_MENU = r"""
 [
     {
         "caption": "Preferences",
@@ -72,7 +73,7 @@ TEMPLATE_MENU = sublime.decode_value(r"""
             { "caption": "-" }
         ]
     }
-]""")
+]"""
 
 
 def mkpath(*paths):
@@ -88,7 +89,7 @@ def runCommand(command, result=False):
 
 
 def makeSessionMenuFile(sessions):
-    data = TEMPLATE_MENU
+    data = deepcopy(TEMPLATE_MENU)
 
     for name in sessions:
         to_write = {
@@ -109,6 +110,9 @@ def makeSessionMenuFile(sessions):
 
     with open(MENU_PATH, "w", encoding="utf-8") as file:
         file.write(sublime.encode_value(data, True))
+
+    print(MSG["reload"])
+    sublime.status_message(MSG["reload"])
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
@@ -245,9 +249,6 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
             makeSessionMenuFile(self.sessions)
 
-            print(MSG["reload"])
-            sublime.status_message(MSG["reload"])
-
         else:
             print(MSG["cancel"])
             sublime.status_message(MSG["cancel"])
@@ -263,8 +264,6 @@ class Sessions(sublime_plugin.EventListener):
         if view.file_name() == SESSIONS_PATH:
             with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
                 makeSessionMenuFile(sublime.decode_value(file.read().strip()))
-            print(MSG["reload"])
-            # sublime.status_message(MSG["reload"])
 
 
 def plugin_loaded():
@@ -273,6 +272,9 @@ def plugin_loaded():
     global SETTINGS_PATH
     global SESSIONS_PATH
     global MENU_PATH
+    global TEMPLATE_MENU
+
+    TEMPLATE_MENU = sublime.decode_value(TEMPLATE_MENU)
 
     USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
     USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, "QuickPuTTY")
@@ -296,8 +298,8 @@ def plugin_loaded():
             file.write(r"{}")
 
     if not os.path.isfile(MENU_PATH):
-        with open(MENU_PATH, "w", encoding="utf-8") as file:
-            file.write(sublime.encode_value(TEMPLATE_MENU, True))
+        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
+            makeSessionMenuFile(sublime.decode_value(file.read().strip()))
 
 
 def plugin_unloaded():
