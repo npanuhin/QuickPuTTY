@@ -17,6 +17,10 @@ The plugin can be installed via [Package Control](https://packagecontrol.io "Vis
 1. Press `Ctrl + Shift + P`, then enter `Package Control: Install Package` (or just `ins`)
 2. Choose `QuickPuTTY` in the list of available packages
 
+You can change encryption keys in plugin settings:
+
+Go to `Preferences > Package Settings > QuickPuTTY Settings`
+
 ## Usage
 
 #### Create session
@@ -27,7 +31,7 @@ The plugin can be installed via [Package Control](https://packagecontrol.io "Vis
 #### Edit sessions
 
 1. Go to `PuTTY > Manage sessions`
-2. Edit session data
+2. Edit session data (if you are editing password, do not forget to specify “encrypt”: true)
 3. Do not forget to save file
 
 #### Remove session

@@ -12,11 +12,6 @@ from .QuickPuTTY_encryption import QuickPuTTYEncryption
 
 PACKAGE_NAME = "QuickPuTTY"
 
-# These keys are used to encrypt passwords. Of course you can change them:
-# (the smaller they are, the shorter the result string will be)
-KEY_ONE = 86
-KEY_TWO = "QuickPuTTY"
-
 MSG = {
     "cancel": "QuickPuTTY: Canceled",
     "reload": "QuickPuTTY: Sessions reloaded",
@@ -26,7 +21,8 @@ MSG = {
     "wrong_port": "Server port must be a natural number.",
     "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!",
     "encrypt_changed_password": "// If you change the password, specify (\"encrypt\": {something, e.g. true}) as one of the session parameters\n",
-    "bad_json": "Sublime Text cannot decode JSON. Please check the file for errors."
+    "bad_json": "Sublime Text cannot decode JSON. Please check the file for errors.",
+    "bad_keys": "The keys specified in the settings are incorrect. Change them and restart Quick PuTTY (or Sublime Text)."
 }
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
@@ -132,6 +128,7 @@ def makeSessionMenuFile(sessions):
 
 
 def checkSessions(sessions):
+    '''Checks if the session format is correct'''
     if not isinstance(sessions, dict):
         sublime.error_message("bad_json")
 
@@ -302,7 +299,7 @@ class Sessions(sublime_plugin.EventListener):
     def on_load(self, view):
         if view.file_name() == SETTINGS_PATH:
             # Preventing the user from changing the default settings.
-            view.set_read_only(True)
+            view.set_read_only(False)
 
     def on_post_save_async(self, view):
         if view.file_name() == SESSIONS_PATH:
@@ -342,7 +339,15 @@ def plugin_loaded():
     SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
     MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
-    encryption = QuickPuTTYEncryption(KEY_ONE, KEY_TWO)
+    settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
+
+    key_one = settings.get("encryption_key_one")
+    key_two = settings.get("encryption_key_two")
+    if not (isinstance(key_one, int) and isinstance(key_two, str)):
+        sublime.error_message(MSG["bad_keys"])
+        return
+
+    encryption = QuickPuTTYEncryption(key_one, key_two)
 
     # Creating "User file"
     if not os.path.isdir(USER_PACKAGE_PATH):

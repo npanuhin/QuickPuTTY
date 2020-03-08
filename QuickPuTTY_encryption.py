@@ -37,15 +37,15 @@ class QuickPuTTYEncryption:
         return ''.join(result)
 
 
-key_one = 42
-key_two = "my_key"
+# key_one = 42
+# key_two = "my_key"
 
-encryption = QuickPuTTYEncryption(key_one, key_two)
+# encryption = QuickPuTTYEncryption(key_one, key_two)
 
-string = "You can't read this string"
+# string = "You can't read this string"
 
-encrypted = encryption.encrypt(string)
-print(encrypted)
+# encrypted = encryption.encrypt(string)
+# print(encrypted)
 
-decrypted = encryption.decrypt(encrypted)
-print(decrypted)
+# decrypted = encryption.decrypt(encrypted)
+# print(decrypted)
