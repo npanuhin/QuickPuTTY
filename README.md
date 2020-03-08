@@ -1,7 +1,7 @@
 <h1><p align="center">QuickPuTTY</p></h1>
 
 <div class="badges" align="center">
-	<a href="https://packagecontrol.io/packages/QuickPuTTY"><img src="https://img.shields.io/packagecontrol/dt/QuickPuTTY"></a>
+	<a href="https://packagecontrol.io/packages/QuickPuTTY" target="_blank" title="Package Control: QuickPuTTY"><img src="https://img.shields.io/packagecontrol/dt/QuickPuTTY"></a>
 	<a href="http://n-panuhin.info/license.html" target="_blank" title="license: MIT"><img alt="license: MIT" src="https://img.shields.io/static/v1?cacheSeconds=604800&style=flat&label=license&message=MIT&color=informational"></a>
 </div>
 
@@ -38,7 +38,7 @@ The plugin can be installed via [Package Control](https://packagecontrol.io "Vis
 -------------------------------------------
 
 The plugin was tested on `Windows 10 (1809) x64` and `Ubuntu 18.04.03`.
-If you have found a bug or mistake, you are very welcome to contact me on [n-panuhin.info](https://n-panuhin.info "Visit n-panuhin.io")
+If you have found a bug or mistake, you are very welcome to contact me on [n-panuhin.info](https://n-panuhin.info "Visit n-panuhin.info")
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
 

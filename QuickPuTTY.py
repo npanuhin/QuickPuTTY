@@ -22,6 +22,9 @@ MSG = {
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
+# JSON is saved this way only because Package Control does not allow
+# files to be opened when the plugin is packed in .sublime-package archive
+
 TEMPLATE_MENU = r"""
 [
     {
@@ -77,10 +80,12 @@ TEMPLATE_MENU = r"""
 
 
 def mkpath(*paths):
+    '''Combines paths and normalizes the result'''
     return os.path.normpath(os.path.join(*paths))
 
 
 def runCommand(command, result=False):
+    '''Runs a system command'''
     if type(command) is str:
         command = list(command.split())
     if result:
@@ -89,6 +94,7 @@ def runCommand(command, result=False):
 
 
 def makeSessionMenuFile(sessions):
+    '''Creates a .sublime-menu file containing given sessions (from a template)'''
     data = deepcopy(TEMPLATE_MENU)
 
     for name in sessions:
@@ -116,6 +122,7 @@ def makeSessionMenuFile(sessions):
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
+    '''Responsible for opening PuTTY.  Handles "quickputty_open" command.'''
 
     def run(self, host=None, port=22, login="", password=""):
         run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
@@ -133,13 +140,15 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
 
 
 class QuickputtyNew(sublime_plugin.WindowCommand):
+    '''Responsible for creating new sessions. Handles "quickputty_new" command.'''
 
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
 
-        self.new_session = {key: None for key in ("name", "host", "port", "login", "password")}
+        self.new_session = {key: None for key in ("host", "port", "login", "password")}
 
+        # Asking for name
         self.window.show_input_panel("Session name", "", self.choose_host, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def choose_host(self, session_name):
@@ -155,8 +164,8 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             sublime.error_message(MSG["already_has_name"])
             return
 
-        self.new_session["name"] = session_name
-        # Asking for host
+        # Saving and asking for host
+        self.session_name = session_name
         self.window.show_input_panel("Server host", "127.0.0.1", self.choose_port, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def choose_port(self, session_host):
@@ -173,8 +182,8 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         if ipv4_match is not None:
             session_host = ".".join(ipv4_match.group(i) for i in range(1, 5))
 
+        # Saving and asking for port
         self.new_session["host"] = session_host
-        # Asking for port
         self.window.show_input_panel("Connection port", "22", self.choose_login, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def choose_login(self, session_port):
@@ -191,22 +200,20 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             sublime.status_message(MSG["cancel"])
             return
 
+        # Saving and asking for username
         self.new_session["port"] = session_port
-        # Asking for username
         self.window.show_input_panel("Username (optional)", "", self.choose_password, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def choose_password(self, session_login):
-        # Session login check
+        # Saving and asking for password
         self.new_session["login"] = session_login.strip()
-        # Asking for password
         self.window.show_input_panel("Password (optional)", "", self.save, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def save(self, session_password):
+        # Saving
         self.new_session["password"] = session_password.strip()
-        name = self.new_session["name"]
-        del self.new_session["name"]
 
-        self.sessions[name] = self.new_session
+        self.sessions[self.session_name] = self.new_session
 
         # Saving to "sessions.json"
         with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
@@ -217,6 +224,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
 
 class QuickputtyRemove(sublime_plugin.WindowCommand):
+    '''Responsible for removing sessions. Handles "quickputty_remove" command.'''
 
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
@@ -226,9 +234,9 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             sublime.message_dialog(MSG["no_sessions"])
             return
 
-        self.session_names = [[name, self.sessions[name]["host"]] for name in self.sessions]
+        self.sessions_data = [[name, self.sessions[name]["host"]] for name in self.sessions]
 
-        self.window.show_quick_panel(["{} ({})".format(name, host) for name, host in self.session_names], self.confirm)
+        self.window.show_quick_panel(["{} ({})".format(name, host) for name, host in self.sessions_data], self.confirm)
 
     def confirm(self, index):
         # If nothing is chosen
@@ -237,7 +245,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             sublime.status_message(MSG["cancel"])
             return
 
-        name, host = self.session_names[index]
+        name, host = self.sessions_data[index]
         if sublime.yes_no_cancel_dialog("Session \"{}\" ({}) will be deleted. Are you sure?".format(name, host)) == sublime.DIALOG_YES:
             del self.sessions[name]
 
@@ -255,18 +263,23 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
 
 class Sessions(sublime_plugin.EventListener):
+    '''Controls the behavior of the settings file and updates the .sublime-menu file.'''
 
     def on_load(self, view):
         if view.file_name() == SETTINGS_PATH:
+            # Preventing the user from changing the default settings.
             view.set_read_only(True)
 
     def on_post_save_async(self, view):
         if view.file_name() == SESSIONS_PATH:
+            # Updating menu file
             with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
                 makeSessionMenuFile(sublime.decode_value(file.read().strip()))
 
 
 def plugin_loaded():
+    # Initialization
+
     global USER_DATA_PATH
     global USER_PACKAGE_PATH
     global SETTINGS_PATH
