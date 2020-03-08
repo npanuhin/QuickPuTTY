@@ -8,7 +8,7 @@
 
 *QuickPuTTY* is a plugin for Sublime Text 3 that allows you to save SSH sessions for quick access to them.
 
-**Warning!** Usernames and passwords are stored in plain text. Make sure no one can access them.
+**Warning!** Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.
 
 ## Installation
 

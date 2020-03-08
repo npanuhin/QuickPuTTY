@@ -5,10 +5,17 @@ import os
 from re import match as re_match
 from copy import deepcopy
 
+from .QuickPuTTY_encryption import QuickPuTTYEncryption
+
 # If you want to edit default settings:
 # Go to "class Session > def on_load" and change "view.set_read_only(True)" to False (or comment this line)
 
 PACKAGE_NAME = "QuickPuTTY"
+
+# These keys are used to encrypt passwords. Of course you can change them:
+# (the smaller they are, the shorter the result string will be)
+KEY_ONE = 86
+KEY_TWO = "QuickPuTTY"
 
 MSG = {
     "cancel": "QuickPuTTY: Canceled",
@@ -17,7 +24,9 @@ MSG = {
     "already_has_name": "A session with that name already exists. Please choose a different name or change an existing one.",
     "empty_host": "Server host cannot be empty. Please enter the server IP address or URL.",
     "wrong_port": "Server port must be a natural number.",
-    "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!"
+    "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!",
+    "encrypt_changed_password": "// If you change the password, specify (\"encrypt\": {something, e.g. true}) as one of the session parameters\n",
+    "bad_json": "Sublime Text cannot decode JSON. Please check the file for errors."
 }
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
@@ -94,7 +103,8 @@ def runCommand(command, result=False):
 
 
 def makeSessionMenuFile(sessions):
-    '''Creates a .sublime-menu file containing given sessions (from a template)'''
+    '''Creates a .sublime-menu file containing given sessions (from a template).
+       Takes an encrypted password'''
     data = deepcopy(TEMPLATE_MENU)
 
     for name in sessions:
@@ -121,6 +131,22 @@ def makeSessionMenuFile(sessions):
     sublime.status_message(MSG["reload"])
 
 
+def checkSessions(sessions):
+    if not isinstance(sessions, dict):
+        sublime.error_message("bad_json")
+
+    for name in sessions:
+        if not isinstance(sessions[name], dict) or "host" not in sessions[name] or "port" not in sessions[name]:
+            sublime.error_message("bad_json")
+            break
+
+        if "encrypt" in sessions[name] and not sessions[name]["encrypt"]:
+            del sessions[name]["encrypt"]
+            sessions[name]["password"] = encryption.encrypt(sessions[name]["password"])
+    else:
+        return sessions
+
+
 class QuickputtyOpen(sublime_plugin.WindowCommand):
     '''Responsible for opening PuTTY.  Handles "quickputty_open" command.'''
 
@@ -135,7 +161,7 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
                 host=host,
                 port=port,
                 login=" -l " + str(login) if login else "",
-                password=" -pw " + str(password) if password else "",
+                password=" -pw " + encryption.decrypt(password) if password else "",
             ))
 
 
@@ -145,6 +171,10 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
+
+        if checkSessions(self.sessions) is None:
+            sublime.status_message(MSG["cancel"])
+            return
 
         self.new_session = {key: None for key in ("host", "port", "login", "password")}
 
@@ -211,13 +241,13 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
     def save(self, session_password):
         # Saving
-        self.new_session["password"] = session_password.strip()
+        self.new_session["password"] = encryption.encrypt(session_password.strip())
 
         self.sessions[self.session_name] = self.new_session
 
         # Saving to "sessions.json"
         with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
-            file.write(sublime.encode_value(self.sessions, True))
+            file.write(MSG["encrypt_changed_password"] + sublime.encode_value(self.sessions, True))
 
         # Writing to sublime-menu file
         makeSessionMenuFile(self.sessions)
@@ -229,6 +259,10 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             self.sessions = sublime.decode_value(file.read().strip())
+
+        if checkSessions(self.sessions) is None:
+            sublime.status_message(MSG["cancel"])
+            return
 
         if not self.sessions:
             sublime.message_dialog(MSG["no_sessions"])
@@ -253,7 +287,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
             # Saving to "sessions.json"
             with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
-                file.write(sublime.encode_value(self.sessions, True))
+                file.write(MSG["encrypt_changed_password"] + sublime.encode_value(self.sessions, True))
 
             makeSessionMenuFile(self.sessions)
 
@@ -274,7 +308,19 @@ class Sessions(sublime_plugin.EventListener):
         if view.file_name() == SESSIONS_PATH:
             # Updating menu file
             with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
-                makeSessionMenuFile(sublime.decode_value(file.read().strip()))
+                try:
+                    sessions = sublime.decode_value(file.read().strip())
+                except Exception:
+                    sublime.error_message(MSG["bad_json"])
+                    return
+
+            sessions = checkSessions(sessions)
+            if sessions is None:
+                return
+
+            with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
+                file.write(MSG["encrypt_changed_password"] + sublime.encode_value(sessions, True))
+            makeSessionMenuFile(sessions)
 
 
 def plugin_loaded():
@@ -286,6 +332,7 @@ def plugin_loaded():
     global SESSIONS_PATH
     global MENU_PATH
     global TEMPLATE_MENU
+    global encryption
 
     TEMPLATE_MENU = sublime.decode_value(TEMPLATE_MENU)
 
@@ -295,6 +342,8 @@ def plugin_loaded():
     SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
     MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
+    encryption = QuickPuTTYEncryption(KEY_ONE, KEY_TWO)
+
     # Creating "User file"
     if not os.path.isdir(USER_PACKAGE_PATH):
         os.mkdir(mkpath(USER_PACKAGE_PATH))
@@ -302,17 +351,22 @@ def plugin_loaded():
     # (Re-)Creating file for storing sessions
     if os.path.isfile(SESSIONS_PATH):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
-            rewrite = (len(file.read().strip()) < 2)
+            try:
+                sessions = sublime.decode_value(file.read().strip())
+            except Exception:
+                sublime.error_message(MSG["bad_json"])
+                return
+            sessions = checkSessions(sessions)
+            if sessions is None:
+                return
     else:
-        rewrite = True
+        sessions = {}
 
-    if rewrite:
-        with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
-            file.write(r"{}")
+    with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
+        file.write(MSG["encrypt_changed_password"] + sublime.encode_value(sessions, True))
 
-    if not os.path.isfile(MENU_PATH):
-        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
-            makeSessionMenuFile(sublime.decode_value(file.read().strip()))
+    with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
+        makeSessionMenuFile(sessions)
 
 
 def plugin_unloaded():
@@ -321,4 +375,7 @@ def plugin_unloaded():
 
     if sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("clear_on_remove", False):
         os.remove(SESSIONS_PATH)
-        os.rmdir(USER_PACKAGE_PATH)
+        try:
+            os.rmdir(USER_PACKAGE_PATH)
+        except Exception:
+            sublime.error_message("Can not remove QuickPuTTY user directory.")
