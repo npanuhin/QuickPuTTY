@@ -31,7 +31,7 @@ Go to `Preferences > Package Settings > QuickPuTTY Settings`
 #### Edit sessions
 
 1. Go to `PuTTY > Manage sessions`
-2. Edit session data (if you are editing password, do not forget to specify “encrypt”: true)
+2. Edit session data (if you are editing password, do not forget to specify “encrypt”)
 3. Do not forget to save file
 
 #### Remove session
