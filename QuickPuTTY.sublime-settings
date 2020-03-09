@@ -12,5 +12,4 @@
 	// "encryption_key_one" must be of type "string"
 	"encryption_key_one": 86,
 	"encryption_key_two": "QuickPuTTY"
-
 }
