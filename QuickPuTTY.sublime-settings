@@ -5,8 +5,11 @@
 	// Clear all QuickPuTTY user files when the package is removed (Including saved sessions)
 	"clear_on_remove": false,
 
-	// These keys are used to encrypt passwords. Of course you can change them:
+	// These keys are used to encrypt passwords. Of course you can change them.
 	// (the smaller they are, the shorter the result string will be)
+	// WARNING!!!
+	// - If you change the key, old encrypted passwords will become invalid!
+	// - You will have to enter all the passwords again.
 	// 
 	// "encryption_key_one" must be of type "int"
 	// "encryption_key_one" must be of type "string"

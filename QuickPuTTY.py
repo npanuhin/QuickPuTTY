@@ -1,6 +1,6 @@
 import sublime
 import sublime_plugin
-from subprocess import Popen, PIPE
+from subprocess import Popen
 import os
 from re import match as re_match
 from copy import deepcopy
@@ -26,7 +26,7 @@ def runCommand(command, result=False):
     if type(command) is str:
         command = list(command.split())
     if result:
-        return Popen(command, stdout=PIPE, stderr=PIPE).communicate()
+        return Popen(command).communicate()
     Popen(command)
 
 
@@ -60,13 +60,13 @@ def makeSessionMenuFile(sessions):
 
 
 def checkSessions(sessions):
-    '''Checks if the session format is correct'''
+    '''Checks whether the session format is correct and encrypts the password'''
     if not isinstance(sessions, dict):
-        sublime.error_message("bad_json")
+        sublime.error_message(MSG["bad_json"])
 
     for name in sessions:
         if not isinstance(sessions[name], dict) or "host" not in sessions[name] or "port" not in sessions[name]:
-            sublime.error_message("bad_json")
+            sublime.error_message(MSG["bad_json"])
             break
 
         if "encrypt" in sessions[name]:
@@ -77,24 +77,19 @@ def checkSessions(sessions):
 
 
 def checkSettings():
-    '''Checks if the settings format is correct'''
+    '''Checks whether the session format is correct'''
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
-    if False in (
-        settings.has("encryption_key_one"),
-        settings.has("encryption_key_two"),
-        settings.has("PuTTY_run_command"),
-        settings.has("clear_on_remove")
-    ):
+    if not settings.has("encryption_key_one") \
+            or not settings.has("encryption_key_two") \
+            or not settings.has("PuTTY_run_command") \
+            or not settings.has("clear_on_remove"):
         return False
 
     settings.clear_on_change("check_settings")
     settings.add_on_change("check_settings", checkSettings)
 
-    key_one = settings.get("encryption_key_one")
-    key_two = settings.get("encryption_key_two")
-
-    if not (isinstance(key_one, int) and isinstance(key_two, str)):
+    if not isinstance(settings.get("encryption_key_one"), int) or not isinstance(settings.get("encryption_key_two"), str):
         sublime.error_message(MSG["bad_keys"])
         return False
 
@@ -111,7 +106,8 @@ def checkSettings():
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
-    '''Responsible for opening PuTTY.  Handles "quickputty_open" command.'''
+    '''Responsible for opening PuTTY.
+       Handles "quickputty_open" command.'''
 
     def run(self, host=None, port=22, login="", password=""):
         run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
@@ -130,7 +126,8 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
 
 
 class QuickputtyNew(sublime_plugin.WindowCommand):
-    '''Responsible for creating new sessions. Handles "quickputty_new" command.'''
+    '''Responsible for creating new sessions.
+       Handles "quickputty_new" command.'''
 
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
@@ -222,7 +219,8 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
 
 class QuickputtyRemove(sublime_plugin.WindowCommand):
-    '''Responsible for removing sessions. Handles "quickputty_remove" command.'''
+    '''Responsible for removing sessions.
+       Handles "quickputty_remove" command.'''
 
     def run(self):
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
@@ -296,6 +294,8 @@ class Sessions(sublime_plugin.EventListener):
 
 
 class QuickputtyReadme(sublime_plugin.WindowCommand):
+    '''Responsible for showing the README file when installing the package.
+       Handles "quickputty_readme" command.'''
 
     def run(self):
         view = sublime.active_window().new_file()
@@ -328,6 +328,7 @@ def plugin_loaded():
     if events.install(PACKAGE_NAME):
         QuickputtyReadme(sublime.active_window()).run()
 
+    # Check settings
     if not checkSettings():
         return
 
@@ -353,20 +354,28 @@ def plugin_loaded():
     else:
         sessions = {}
 
+    # Updating sessions.json
     with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
         file.write(MSG["encrypt_changed_password"] + sublime.encode_value(sessions, True))
 
-    with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
-        makeSessionMenuFile(sessions)
+    # Making menu file
+    makeSessionMenuFile(sessions)
 
 
 def plugin_unloaded():
+    from package_control import events
+
+    # Removing unnecessary menu file
     if os.path.exists(MENU_PATH):
         os.remove(MENU_PATH)
 
-    if sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("clear_on_remove", False):
-        os.remove(SESSIONS_PATH)
-        try:
-            os.rmdir(USER_PACKAGE_PATH)
-        except Exception:
-            sublime.error_message("Can not remove QuickPuTTY user directory.")
+    if events.remove(PACKAGE_NAME):
+        # If setting "clear_on_remove" is True:
+        if sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("clear_on_remove", False):
+            # Removing sessions.json
+            os.remove(SESSIONS_PATH)
+            # Trying to remove QuickPuTTY user directory
+            try:
+                os.rmdir(USER_PACKAGE_PATH)
+            except Exception:
+                sublime.error_message("Can not remove QuickPuTTY user directory.")
