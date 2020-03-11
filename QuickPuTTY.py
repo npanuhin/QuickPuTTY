@@ -16,21 +16,12 @@ PACKAGE_NAME = "QuickPuTTY"
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
 
-def mkpath(*paths):
+def mkpath(*paths) -> str:
     '''Combines paths and normalizes the result'''
     return os.path.normpath(os.path.join(*paths))
 
 
-def runCommand(command, result=False):
-    '''Runs a system command'''
-    if type(command) is str:
-        command = list(command.split())
-    if result:
-        return Popen(command).communicate()
-    Popen(command)
-
-
-def makeSessionMenuFile(sessions):
+def makeSessionMenuFile(sessions: dict) -> None:
     '''Creates a .sublime-menu file containing given sessions (from a template).
        Takes an encrypted password'''
     data = deepcopy(TEMPLATE_MENU)
@@ -59,24 +50,24 @@ def makeSessionMenuFile(sessions):
     sublime.status_message(MSG["reload"])
 
 
-def checkSessions(sessions):
+def checkSessions(sessions: dict) -> dict:
     '''Checks whether the session format is correct and encrypts the password'''
     if not isinstance(sessions, dict):
-        sublime.error_message(MSG["bad_json"])
+        sublime.error_message(MSG["invalid_sessions"])
 
     for name in sessions:
         if not isinstance(sessions[name], dict) or "host" not in sessions[name] or "port" not in sessions[name]:
-            sublime.error_message(MSG["bad_json"])
+            sublime.error_message(MSG["invalid_sessions"])
             break
 
-        if "encrypt" in sessions[name]:
+        if "encrypt" in sessions[name] or "encr" in sessions[name]:
             del sessions[name]["encrypt"]
             sessions[name]["password"] = encryption.encrypt(sessions[name]["password"])
     else:
         return sessions
 
 
-def checkSettings():
+def checkSettings() -> bool:
     '''Checks whether the session format is correct'''
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
@@ -84,6 +75,7 @@ def checkSettings():
             or not settings.has("encryption_key_two") \
             or not settings.has("PuTTY_run_command") \
             or not settings.has("clear_on_remove"):
+        sublime.error_message(MSG["setting_not_found"])
         return False
 
     settings.clear_on_change("check_settings")
@@ -109,20 +101,19 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
     '''Responsible for opening PuTTY.
        Handles "quickputty_open" command.'''
 
-    def run(self, host=None, port=22, login="", password=""):
+    def run(self, host: str = None, port: int = 22, login: str = "", password: str = "") -> None:
         run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
 
         if host is None:
-            runCommand(run_command)
+            Popen([run_command])
         else:
             password = encryption.decrypt(password)
-            runCommand("{putty} -ssh {host} -P {port}{login}{password}".format(
-                putty=run_command,
-                host=host,
-                port=port,
-                login=" -l " + str(login) if login else "",
-                password=" -pw " + password if password else "",
-            ))
+            command = [run_command, "-ssh", host, "-P", str(port)]
+            if login:
+                command += ["-l", login]
+            if password:
+                command += ["-pw", password]
+            Popen(command)
 
 
 class QuickputtyNew(sublime_plugin.WindowCommand):
@@ -134,7 +125,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             try:
                 self.sessions = sublime.decode_value(file.read().strip())
             except Exception:
-                sublime.error_message(MSG["bad_json"])
+                sublime.error_message(MSG["invalid_json"])
                 return
 
         if checkSessions(self.sessions) is None:
@@ -227,7 +218,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             try:
                 self.sessions = sublime.decode_value(file.read().strip())
             except Exception:
-                sublime.error_message(MSG["bad_json"])
+                sublime.error_message(MSG["invalid_json"])
                 return
 
         if checkSessions(self.sessions) is None:
@@ -281,7 +272,7 @@ class Sessions(sublime_plugin.EventListener):
                 try:
                     sessions = sublime.decode_value(file.read().strip())
                 except Exception:
-                    sublime.error_message(MSG["bad_json"])
+                    sublime.error_message(MSG["invalid_json"])
                     return
 
             sessions = checkSessions(sessions)
@@ -306,6 +297,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
 
 def plugin_loaded():
     # Initialization
+    import sublime
     from package_control import events
 
     global USER_DATA_PATH
@@ -346,7 +338,7 @@ def plugin_loaded():
             try:
                 sessions = sublime.decode_value(file.read().strip())
             except Exception:
-                sublime.error_message(MSG["bad_json"])
+                sublime.error_message(MSG["invalid_json"])
                 return
             sessions = checkSessions(sessions)
             if sessions is None:

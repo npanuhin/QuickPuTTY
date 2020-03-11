@@ -10,7 +10,9 @@ MSG = {
     "wrong_port": "Server port must be a natural number.",
     "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!",
     "encrypt_changed_password": "// If you change the password, specify (\"encrypt\": {something, e.g. true}) as one of the session parameters\n",
-    "bad_json": "Sublime Text cannot decode JSON. Please check the file for errors.",
+    "invalid_json": "Sublime Text cannot decode JSON. Please check file for errors.",
+    "invalid_sessions": "Session format is invalid. Restart QuickPuTTY or fix it yourself.",
+    "setting_not_found": "Some settings keys were not found in QuickPuTTY.sublime-settings. Try reinstalling QuickPuTTY (if \"clear_on_remove\" is False, sessions will not be deleted)",
     "bad_keys": "The encryption keys specified in the settings are incorrect. Change them and restart QuickPuTTY (or Sublime Text).",
     "bad_clear_on_remove": "The setting \"clear_on_remove\" is incorrect. Please check that the value is of type bool (true or false).",
     "bad_PuTTY_run_command": "The setting \"PuTTY_run_command\" is incorrect. Please check that the value is of type str (string)."
