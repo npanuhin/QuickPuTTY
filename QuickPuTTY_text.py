@@ -1,3 +1,8 @@
+#  Copyright (c) 2020 Nikita Paniukhin  |
+#     Licensed under the MIT license    |
+# ---------------------------------------
+
+
 # JSON and HTML is saved this way only because Package Control does not allow
 # files to be opened when the plugin is packed in .sublime-package archive
 
@@ -56,7 +61,7 @@ TEMPLATE_MENU = r"""
     },
     {
         "caption": "PuTTY",
-        "mnemonic": "P",
+        "mnemonic": "u",
         "id": "putty",
         "children": [
             // If you want, you can add an option to only run PuTTY (without connecting to certain server):

@@ -1,3 +1,7 @@
+#  Copyright (c) 2020 Nikita Paniukhin  |
+#     Licensed under the MIT license    |
+# ---------------------------------------
+
 import sublime
 import sublime_plugin
 from subprocess import Popen
@@ -5,8 +9,7 @@ import os
 from re import match as re_match
 from copy import deepcopy
 
-from .QuickPuTTY_encryption import QuickPuTTYEncryption
-from .QuickPuTTY_text import *
+from .QuickPuTTY_text import MSG, TEMPLATE_MENU, INSTALL_HTML
 
 # If you want to edit default settings:
 # Go to "class Session > def on_load" and change "view.set_read_only(True)" to False (or comment this line)
@@ -15,10 +18,44 @@ PACKAGE_NAME = "QuickPuTTY"
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
+USER_DATA_PATH, USER_PACKAGE_PATH, SETTINGS_PATH, SESSIONS_PATH, MENU_PATH = None, None, None, None, None
+
 
 def mkpath(*paths) -> str:
     '''Combines paths and normalizes the result'''
     return os.path.normpath(os.path.join(*paths))
+
+
+class QuickPuTTYEncryption:
+    def __init__(self, key_one: int, key_two: str):
+        self.ASCII_SIZE = 1114159
+        self.alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.key_one = key_one
+        self.key_two = sum(ord(key_two[i]) * (self.ASCII_SIZE ** i) for i in range(len(key_two))) % self.key_one
+
+    def base_36(self, num: int) -> str:
+        '''Converts number to base 36'''
+        return self.alphabet[num] if num < 36 else self.base_36(num // 36) + self.alphabet[num % 36]
+
+    def encrypt(self, string: str) -> str:
+        '''Encrypts string'''
+        res = sum([(ord(string[i]) + self.key_one) * ((self.ASCII_SIZE + self.key_one + self.key_two) ** i) for i in range(len(string))])
+        return self.base_36(res)
+
+    def decrypt(self, string: str) -> str:
+        '''Decrypts string'''
+        string = int(string, 36)
+        result = []
+        while string > 0:
+            string, letter = divmod(string, (self.ASCII_SIZE + self.key_one + self.key_two))
+            result.append(chr(letter - self.key_one))
+        return "".join(result)
+
+# key_one, key_two, string = 42, "my_key", "You can't read this string"
+# encryption = QuickPuTTYEncryption(key_one, key_two)
+# encrypted = encryption.encrypt(string)
+# decrypted = encryption.decrypt(encrypted)
+# print(encrypted, decrypted)
 
 
 def makeSessionMenuFile(sessions: dict) -> None:
@@ -175,7 +212,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
     def choose_login(self, session_port):
         # Session port check
         try:
-            session_port = int(session_port.strip())
+            session_port = int(session_port)
             wrong = session_port <= 0
         except Exception:
             wrong = True
@@ -214,6 +251,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
        Handles "quickputty_remove" command.'''
 
     def run(self):
+        # Get sessions
         with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
             try:
                 self.sessions = sublime.decode_value(file.read().strip())
@@ -221,16 +259,20 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                 sublime.error_message(MSG["invalid_json"])
                 return
 
+        # Check sessions
         if checkSessions(self.sessions) is None:
             sublime.status_message(MSG["cancel"])
             return
 
+        # If sessions list is empty
         if not self.sessions:
             sublime.message_dialog(MSG["no_sessions"])
             return
 
+        # Create a list [name, host]
         self.sessions_data = [[name, self.sessions[name]["host"]] for name in self.sessions]
 
+        # Ask user
         self.window.show_quick_panel(["{} ({})".format(name, host) for name, host in self.sessions_data], self.confirm)
 
     def confirm(self, index):
@@ -242,14 +284,14 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
         name, host = self.sessions_data[index]
         if sublime.yes_no_cancel_dialog("Session \"{}\" ({}) will be deleted. Are you sure?".format(name, host)) == sublime.DIALOG_YES:
+            # User agreed to remove, removing:
             del self.sessions[name]
 
             print(MSG["remove"].format(session_name=name))
 
-            # Saving to "sessions.json"
+            # Updating "sessions.json" and menu file
             with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
                 file.write(MSG["encrypt_changed_password"] + sublime.encode_value(self.sessions, True))
-
             makeSessionMenuFile(self.sessions)
 
         else:
@@ -257,8 +299,8 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             sublime.status_message(MSG["cancel"])
 
 
-class Sessions(sublime_plugin.EventListener):
-    '''Controls the behavior of the settings file and updates the .sublime-menu file.'''
+class Files(sublime_plugin.EventListener):
+    '''Controls the behavior of settings file and sessions file and updates the .sublime-menu file.'''
 
     def on_load(self, view):
         if view.file_name() == SETTINGS_PATH:
@@ -275,10 +317,12 @@ class Sessions(sublime_plugin.EventListener):
                     sublime.error_message(MSG["invalid_json"])
                     return
 
+            # Checking sessiosn
             sessions = checkSessions(sessions)
             if sessions is None:
                 return
 
+            # Updating "sessiosn.json"
             with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
                 file.write(MSG["encrypt_changed_password"] + sublime.encode_value(sessions, True))
             makeSessionMenuFile(sessions)
