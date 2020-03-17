@@ -120,30 +120,31 @@ INSTALL_HTML = """
     <h1>QuickPuTTY</h1>
     <p><em>QuickPuTTY</em> is a plugin for Sublime Text 3 that allows you to save SSH sessions for quick access to them.</p>
     <p><strong>Warning!</strong> Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.</p>
+    <p>Plugin needs a free and open-source terminal emulator <a href="https://putty.org">PuTTY</a> to work.</p>
     <h3>Installation</h3>
     <p style="margin-bottom:0">If you see this message in Sublime Text, you have already completed this step :)</p>
     <p style="margin-top:0">Otherwise, visit <a href="https://github.com/Nikita-Panyuhin/QuickPuTTY">QuickPuTTY github page</a> to find all information.</p>
-    <p style="margin-bottom:0">You can change encryption keys in plugin settings:</p>
+    <p style="margin-bottom:0">You can change encryption keys in plugin settings (looking through all settings may be useful):</p>
     <p style="margin-top:0.1rem">Go to <code>Preferences &gt; Package Settings &gt; QuickPuTTY Settings</code></p>
     <h3>Usage</h3>
     <h4>Create session:</h4>
     <ol>
-        <li>Go to <code>PuTTY &gt; New session</code></li>
+        <li>Go to <code>PuTTY &gt; New session</code> in the nav-bar</li>
         <li>Enter server host/ip, port, username and password (last two are optional)</li>
     </ol>
     <h4>Edit sessions:</h4>
     <ol>
-        <li>Go to <code>PuTTY &gt; Manage sessions</code></li>
+        <li>Go to <code>PuTTY &gt; Manage sessions</code> in the nav-bar</li>
         <li>Edit session data (if you are editing password, do not forget to specify “encrypt”)</li>
         <li>Do not forget to save file</li>
     </ol>
     <h4>Remove session:</h4>
     <ol>
-        <li>Go to <code>PuTTY &gt; Remove session</code></li>
+        <li>Go to <code>PuTTY &gt; Remove session</code> in the nav-bar</li>
         <li>Choose a session that you want to remove</li>
     </ol>
     <div class="hr"></div>
-    <p>The plugin was tested on <code>Windows 10 (1809) x64</code> and <code>Ubuntu 18.04.03</code>. If you have found a bug or mistake, you are very welcome to contact me on <a href="https://n-panuhin.info" title="Visit n-panuhin.info">n-panuhin.info</a></p>
+    <p>The plugin was tested on <code>Windows 10 (1809) x64</code> and <code>Ubuntu 18.04.03</code>. If you have found a bug or mistake, you are very welcome to contact me on <a href="https://n-panuhin.info" title="Visit n-panuhin.info">n-panuhin.info</a> or open a <a href="https://github.com/Nikita-Panyuhin/QuickPuTTY/issues/new">new GitHub issue</a></p>
     <p>You can find the latest version of PuTTY on <a href="https://putty.org" title="Visit putty.org">putty.org</a></p>
     <div class="hr"></div>
     <p style="margin-bottom:0.3rem">Copyright © 2020 Nikita Paniukhin</p>
