@@ -108,10 +108,10 @@ def checkSettings() -> bool:
     '''Checks whether the session format is correct'''
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
-    if not settings.has("encryption_key_one") \
-            or not settings.has("encryption_key_two") \
-            or not settings.has("PuTTY_run_command") \
-            or not settings.has("clear_on_remove"):
+    if (not settings.has("encryption_key_one")
+            or not settings.has("encryption_key_two")
+            or not settings.has("PuTTY_run_command")
+            or not settings.has("clear_on_remove")):
         sublime.error_message(MSG["setting_not_found"])
         return False
 
@@ -339,31 +339,9 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
         view.add_phantom("test", sublime.Region(0, 0), INSTALL_HTML, sublime.LAYOUT_BELOW, lambda url: sublime.run_command("open_url", args={"url": url}))
 
 
-def plugin_loaded():
-    # Initialization
-    import sublime
-    from package_control import events
-
-    global USER_DATA_PATH
-    global USER_PACKAGE_PATH
-    global SETTINGS_PATH
-    global SESSIONS_PATH
-    global MENU_PATH
-    global TEMPLATE_MENU
+def onLoad():
     global encryption
-
-    TEMPLATE_MENU = sublime.decode_value(TEMPLATE_MENU)
-
-    USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
-    USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, "QuickPuTTY")
-    SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "QuickPuTTY.sublime-settings")
-    SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
-    MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
-
-    # Show README
-    if events.install(PACKAGE_NAME):
-        QuickputtyReadme(sublime.active_window()).run()
-
+    
     # Check settings
     if not checkSettings():
         return
@@ -397,9 +375,37 @@ def plugin_loaded():
     # Making menu file
     makeSessionMenuFile(sessions)
 
+def plugin_loaded():
+    # Initialization
+    import sublime
+    from package_control import events
+
+    global USER_DATA_PATH
+    global USER_PACKAGE_PATH
+    global SETTINGS_PATH
+    global SESSIONS_PATH
+    global MENU_PATH
+    global TEMPLATE_MENU
+
+    TEMPLATE_MENU = sublime.decode_value(TEMPLATE_MENU)
+
+    USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
+    USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, "QuickPuTTY")
+    SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "QuickPuTTY.sublime-settings")
+    SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
+    MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
+
+    # Show README
+    if events.install(PACKAGE_NAME):
+        QuickputtyReadme(sublime.active_window()).run()
+
+    sublime.set_timeout_async(onLoad, 500)
+
 
 def plugin_unloaded():
     from package_control import events
+
+    sublime.load_settings(PACKAGE_NAME + ".sublime-settings").clear_on_change("check_settings")
 
     # Removing unnecessary menu file
     if os.path.exists(MENU_PATH):
