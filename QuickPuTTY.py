@@ -9,10 +9,11 @@ import os
 from re import match as re_match
 from copy import deepcopy
 
-from .QuickPuTTY_text import MSG, TEMPLATE_MENU, INSTALL_HTML
+from .messages.QuickPuTTY_text import MSG, TEMPLATE_MENU, INSTALL_HTML
 
 # If you want to edit default settings:
 # Go to "class Session > def on_load" and change "view.set_read_only(True)" to False (or comment this line)
+# !(currently disabled)!
 
 PACKAGE_NAME = "QuickPuTTY"
 
@@ -78,7 +79,7 @@ def makeSessionMenuFile(sessions: dict) -> None:
         if sessions[name]["password"]:
             to_write["args"]["password"] = sessions[name]["password"]
 
-        data[1]["children"].append(to_write)
+        data[0]["children"].append(to_write)
 
     with open(MENU_PATH, "w", encoding="utf-8") as file:
         file.write(sublime.encode_value(data, True))
@@ -108,12 +109,12 @@ def checkSettings() -> bool:
     '''Checks whether the session format is correct'''
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
-    if (not settings.has("encryption_key_one")
-            or not settings.has("encryption_key_two")
-            or not settings.has("PuTTY_run_command")
-            or not settings.has("clear_on_remove")):
-        sublime.error_message(MSG["setting_not_found"])
-        return False
+    if (not settings.has("encryption_key_one") or
+        not settings.has("encryption_key_two") or
+        not settings.has("PuTTY_run_command") or
+        not settings.has("clear_on_remove")):
+            sublime.error_message(MSG["setting_not_found"])
+            return False
 
     settings.clear_on_change("check_settings")
     settings.add_on_change("check_settings", checkSettings)
@@ -302,10 +303,13 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 class Files(sublime_plugin.EventListener):
     '''Controls the behavior of settings file and sessions file and updates the .sublime-menu file.'''
 
-    def on_load(self, view):
-        if view.file_name() == SETTINGS_PATH:
-            # Preventing the user from changing the default settings.
-            view.set_read_only(True)
+    # Does not work in sublime-package file :(
+    # Currently disabled
+    # def on_load(self, view):
+    #     if view.file_name() == SETTINGS_PATH:
+    #         # Preventing the user from changing the default settings.
+    #         print("YES")
+    #         view.set_read_only(True)
 
     def on_post_save_async(self, view):
         if view.file_name() == SESSIONS_PATH:
@@ -341,7 +345,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
 
 def onLoad():
     global encryption
-    
+
     # Check settings
     if not checkSettings():
         return
@@ -374,6 +378,7 @@ def onLoad():
 
     # Making menu file
     makeSessionMenuFile(sessions)
+
 
 def plugin_loaded():
     # Initialization

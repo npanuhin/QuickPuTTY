@@ -9,9 +9,8 @@
 
 *QuickPuTTY* is a plugin for Sublime Text 3 that allows you to save SSH sessions for quick access to them.
 
-**Warning!** Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.
-
-Plugin needs a free and open-source terminal emulator [PuTTY](https://putty.org "Visit putty.org") to work.
+Plugin will be useful to those who often use SSH.
+Works with a free and open-source terminal emulator [PuTTY](https://putty.org "Visit putty.org").
 
 <h2>Installation</h2>
 
@@ -23,6 +22,8 @@ The plugin is available on [Package Control](https://packagecontrol.io/packages/
 After installation, you can change encryption keys in plugin settings (looking through all settings may be useful):
 
 Go to `Preferences > Package Settings > QuickPuTTY > Settings` in the nav-bar.
+
+![](./messages/installation.gif)
 
 ## Usage
 
@@ -41,6 +42,8 @@ Go to `Preferences > Package Settings > QuickPuTTY > Settings` in the nav-bar.
 
 1.  Go to `PuTTY > Remove session` in the nav-bar
 2.  Choose a session that you want to remove
+
+**Warning!** Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.
 
 -------------------------------------------
 
