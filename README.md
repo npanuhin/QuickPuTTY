@@ -12,6 +12,8 @@
 Plugin will be useful to those who often use SSH.
 Works with a free and open-source terminal emulator [PuTTY](https://putty.org "Visit putty.org").
 
+![](./messages/usage.gif)
+
 <h2>Installation</h2>
 
 The plugin is available on [Package Control](https://packagecontrol.io/packages/QuickPuTTY "QuickPuTTY page on packagecontrol.io") and can be installed in this way:
