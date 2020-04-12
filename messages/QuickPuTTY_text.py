@@ -9,13 +9,14 @@
 MSG = {
     "cancel": "QuickPuTTY: Canceled",
     "reload": "QuickPuTTY: Sessions reloaded",
-    "remove": "QuickPuTTY: Session \"{session_name}\" was removed",
-    "already_has_name": "A session with that name already exists. Please choose a different name or change an existing one.",
-    "empty_host": "Server host cannot be empty. Please enter the server IP address or URL.",
+    "remove_session": "QuickPuTTY: Session \"{name}\" was removed",
+    "remove_folder": "QuickPuTTY: Folder \"{name}\" was removed",
+    "already_has_this": "A session with that name already exists. Please choose a different name or change an existing one.",
     "wrong_port": "Server port must be a natural number.",
     "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!",
     "encrypt_changed_password": "// If you change the password, specify (\"encrypt\": {something, e.g. true}) as one of the session parameters\n",
     "invalid_json": "Sublime Text cannot decode JSON. Please check file for errors.",
+    "invalid_sessions_json": "Sublime Text cannot decode JSON in sessions.json file. Please check it for errors.",
     "invalid_sessions": "Session format is invalid. Restart QuickPuTTY or fix it yourself.",
     "setting_not_found": "Some settings keys were not found in QuickPuTTY.sublime-settings. Try reinstalling QuickPuTTY (if \"clear_on_remove\" is False, sessions will not be deleted)",
     "bad_keys": "The encryption keys specified in the settings are incorrect. Change them and restart QuickPuTTY (or Sublime Text).",
@@ -38,17 +39,20 @@ TEMPLATE_MENU = r"""
             // },
             // { "caption": "-" },
             {
-                "caption": "New session",
-                "command": "quickputty_new"
+                "caption": "New session/folder",
+                "command": "quickputty_new",
+                "mnemonic": "N"
             },
             {
                 "caption": "Manage sessions",
                 "command": "open_file",
                 "args": {"file": "${packages}/User/QuickPuTTY/sessions.json"},
+                "mnemonic": "M"
             },
             {
-                "caption": "Remove session",
-                "command": "quickputty_remove"
+                "caption": "Remove session/folder",
+                "command": "quickputty_remove",
+                "mnemonic": "R"
             },
             { "caption": "-" }
         ]

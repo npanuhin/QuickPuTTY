@@ -12,7 +12,7 @@
 Plugin will be useful to those who often use SSH.
 Works with a free and open-source terminal emulator [PuTTY](https://putty.org "Visit putty.org").
 
-![](./messages/usage.gif)
+<!-- ![](./messages/usage.gif) -->
 
 <h2>Installation</h2>
 
