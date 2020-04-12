@@ -12,11 +12,15 @@
 Plugin will be useful to those who often use SSH.
 Works with a free and open-source terminal emulator [PuTTY](https://putty.org "Visit putty.org").
 
-<!-- ![](./messages/usage.gif) -->
+**New!** Folders supported.
+
+See how fast you can start an SSH session **without entering username and password**:
+
+![](./messages/usage.gif)
 
 <h2>Installation</h2>
 
-The plugin is available on [Package Control](https://packagecontrol.io/packages/QuickPuTTY "QuickPuTTY page on packagecontrol.io") and can be installed in this way:
+The plugin is available on [Package Control](https://packagecontrol.io/packages/QuickPuTTY "Visit QuickPuTTY page on packagecontrol.io") and can be installed in this way:
 
 1.  Press `Ctrl + Shift + P`, then enter `Package Control: Install Package` (or just `ins`)
 2.  Choose `QuickPuTTY` in the list of available packages
@@ -29,23 +33,42 @@ Go to `Preferences > Package Settings > QuickPuTTY > Settings` in the nav-bar.
 
 ## Usage
 
+**Warning!** Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.
+
+#### Create folder
+
+1.  Go to `PuTTY > New session/folder` in the nav-bar and select `folder` option
+2.  [Choose location](#choosing-location) to place new folder
+3.  Enter folder name
+
 #### Create session
 
-1.  Go to `PuTTY > New session` in the nav-bar
-2.  Enter server host/ip, port, username and password (last two are optional)
+1.  Go to `PuTTY > New session/folder` in the nav-bar and select `session` option
+2.  [Choose location](#choosing-location) to place new session
+3.  Enter server host/ip, port, username and password (last two are optional)
 
-#### Edit sessions
+#### Edit sessions and folders
 
 1.  Go to `PuTTY > Manage sessions` in the nav-bar
-2.  Edit session data (if you are editing password, do not forget to specify “encrypt”)
+2.  Edit data (if you are editing password, do not forget to specify “encrypt”)
 3.  Do not forget to save file
 
-#### Remove session
+#### Remove session/folder
 
-1.  Go to `PuTTY > Remove session` in the nav-bar
-2.  Choose a session that you want to remove
+1.  Go to `PuTTY > Remove session/folder` in the nav-bar
+2.  Select session or folder you want to remove
 
-**Warning!** Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.
+#### Choosing location
+
+At each stage, you'll see a list of options:
+
+|           item          |                            meaning                                  |
+|:-----------------------:|:-------------------------------------------------------------------:|
+| ### Choose location ### |                          Just a title                               |
+|         \<HERE\>        | Choose this if you want to place session/folder in current location |
+|        {folder_1}       |            Select a folder name to navigate into it                 |
+|          . . .          |                             . . .                                   |
+
 
 -------------------------------------------
 

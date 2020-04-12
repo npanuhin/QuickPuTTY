@@ -260,7 +260,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
             self.cur_folders = [i for i in range(len(self.cur_location)) if "children" in self.cur_location[i]]
 
-            self.window.show_quick_panel(["***Choose location***", "HERE"] + [self.cur_location[i]["name"] for i in self.cur_folders], choose)
+            self.window.show_quick_panel(["### Choose location ###", "<HERE>"] + [self.cur_location[i]["name"] for i in self.cur_folders], choose)
 
         choose(0)
 

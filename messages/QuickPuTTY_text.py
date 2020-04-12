@@ -65,32 +65,47 @@ INSTALL_HTML = """
 <body id="quickputty-readme">
     <style>
         code {
-            padding: 0 0.3em
+            padding: 0 0.3em;
+            background-color: #444;
         }
-        html.dark code, html.dark .hr {
+        .hr {
+            width: 999rem;
+            height: 0.2rem;
             background-color: #444;
         }
         html.light code {
             background-color: #eee;
         }
-        h1 {
-            margin-top: 0;
-            font-size: 2.3rem;
-        }
-        h3 {
-            font-size: 1.4rem;
-        }
-        .hr {
-            width: 999rem;
-            height: 0.2rem;
-        }
         html.light .hr {
             background-color: #ddd;
+        }
+        h1 {
+            margin-top: 0;
+            font-size: 2.8rem;
+            color: #00d763;
+        }
+        html.light h1 {
+            color: #00c705;
+        }
+        h3 {
+            font-size: 1.5rem;
+            color: #8888ff;
+        }
+        html.light h3 {
+            color: #8888ff;
+        }
+        h4 {
+            color: #ffb800;
+        }
+        .warn {
+            color: #ff9c9c;
+        }
+        html.light .warn {
+            color: #ff5454;
         }
     </style>
     <h1>QuickPuTTY</h1>
     <p><em>QuickPuTTY</em> is a plugin for Sublime Text 3 that allows you to save SSH sessions for quick access to them.</p>
-    <p><strong>Warning!</strong> Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.</p>
     <p>Plugin needs a free and open-source terminal emulator <a href="https://putty.org">PuTTY</a> to work.</p>
     <h3>Installation</h3>
     <p style="margin-bottom:0">If you see this message in Sublime Text, you have already completed this step :)</p>
@@ -98,21 +113,29 @@ INSTALL_HTML = """
     <p style="margin-bottom:0">You can change encryption keys in plugin settings (looking through all settings may be useful):</p>
     <p style="margin-top:0.1rem">Go to <code>Preferences &gt; Package Settings &gt; QuickPuTTY Settings</code></p>
     <h3>Usage</h3>
+    <p><strong class="warn" style="font-size: 1.1rem;">Warning!</strong> Usernames and passwords are stored using symmetric-key encryption (can be easily decoded). Make sure no one can access them.</p>
+    <h4>Create folder:</h4>
+    <ol>
+        <li>Go to <code>PuTTY &gt; New session/folder</code> in the nav-bar and select <code>folder</code> option</li>
+        <li>Choose location to place new folder</li>
+        <li>Enter folder name</li>
+    </ol>
     <h4>Create session:</h4>
     <ol>
-        <li>Go to <code>PuTTY &gt; New session</code> in the nav-bar</li>
+        <li>Go to <code>PuTTY &gt; New session/folder</code> in the nav-bar and select <code>session</code> option</li>
+        <li>Choose location to place new session</li>
         <li>Enter server host/ip, port, username and password (last two are optional)</li>
     </ol>
-    <h4>Edit sessions:</h4>
+    <h4>Edit sessions and folders:</h4>
     <ol>
         <li>Go to <code>PuTTY &gt; Manage sessions</code> in the nav-bar</li>
-        <li>Edit session data (if you are editing password, do not forget to specify “encrypt”)</li>
+        <li>Edit data (if you are editing password, do not forget to specify “encrypt”)</li>
         <li>Do not forget to save file</li>
     </ol>
-    <h4>Remove session:</h4>
+    <h4>Remove session/folder:</h4>
     <ol>
-        <li>Go to <code>PuTTY &gt; Remove session</code> in the nav-bar</li>
-        <li>Choose a session that you want to remove</li>
+        <li>Go to <code>PuTTY &gt; Remove session/folder</code> in the nav-bar</li>
+        <li>Select session or folder you want to remove</li>
     </ol>
     <div class="hr"></div>
     <p>The plugin was tested on <code>Windows 10 (1809) x64</code> and <code>Ubuntu 18.04.03</code>. If you have found a bug or mistake, you are very welcome to contact me on <a href="https://n-panuhin.info" title="Visit n-panuhin.info">n-panuhin.info</a> or open a <a href="https://github.com/Nikita-Panyuhin/QuickPuTTY/issues/new">new GitHub issue</a></p>
