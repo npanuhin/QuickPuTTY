@@ -35,7 +35,6 @@ class QuickPuTTYEncryption:
         self.key_two = sum(ord(key_two[i]) * (self.ASCII_SIZE ** i) for i in range(len(key_two))) % self.key_one
 
     def base_36(self, num: int) -> str:
-        '''Converts number to base 36'''
         return self.alphabet[num] if num < 36 else self.base_36(num // 36) + self.alphabet[num % 36]
 
     def encrypt(self, string: str) -> str:
@@ -141,6 +140,7 @@ def checkSettings() -> bool:
     '''Checks whether the session format is correct'''
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
+    # Check if all settings exist
     if not (
         settings.has("encryption_key_one") and
         settings.has("encryption_key_two") and
@@ -150,6 +150,7 @@ def checkSettings() -> bool:
         sublime.error_message(MSG["setting_not_found"])
         return False
 
+    # Adding handler
     settings.clear_on_change("check_settings")
     settings.add_on_change("check_settings", checkSettings)
 
@@ -158,21 +159,22 @@ def checkSettings() -> bool:
         sublime.error_message(MSG["bad_keys"])
         return False
 
-    # Checking "clear_on_remove"
+    # Checking "clear_on_remove" setting
     if not isinstance(settings.get("clear_on_remove"), bool):
         sublime.error_message(MSG["bad_clear_on_remove"])
         return False
 
-    # Checking "PuTTY_run_command"
+    # Checking "PuTTY_run_command" setting
     if not isinstance(settings.get("PuTTY_run_command"), str):
         sublime.error_message(MSG["bad_PuTTY_run_command"])
         return False
 
-    print("QuickPuTTY: Settings checked")
+    print(PACKAGE_NAME + ": Settings checked")
     return True
 
 
 def updateSesions(sessions):
+    '''Stores sessions to "sessions.json" and creates a .sublime-menu file'''
     with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
         file.write(MSG["encrypt_changed_password"] + json_dumps(sessions, ensure_ascii=False, indent=4, sort_keys=False))
     makeSessionMenuFile(sessions)
@@ -229,14 +231,10 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             self.choose_location(self.window.show_input_panel, "Folder name", "", self.save_folder, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def save_folder(self, folder_name):
+        # Saving folder name
         self.cur_location.append({"name": folder_name, "children": []})
 
-        # Updating sessions.json
-        with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
-            file.write(MSG["encrypt_changed_password"] + json_dumps(self.sessions, ensure_ascii=False, indent=4, sort_keys=False))
-
-        # Writing to sublime-menu file
-        makeSessionMenuFile(self.sessions)
+        updateSesions(self.sessions)
 
     def choose_location(self, callback, *args):
 
@@ -250,7 +248,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
                 sublime.status_message(MSG["cancel"])
                 return
 
-            if index == 0:  # Click on the text...
+            if index == 0:  # Click on the title...
                 pass
             elif index == 1:  # If "HERE" is chosen
                 callback(*args)
@@ -317,9 +315,11 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         self.window.show_input_panel("Username (optional)", "", self.choose_password, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def choose_password(self, session_login):
-        # Saving login and asking for password
+        # Saving login
         if session_login.strip():
             self.new_session["login"] = session_login.strip()
+
+        # Asking for password
         self.window.show_input_panel("Password (optional)", "", self.save_session, 0, lambda: sublime.status_message(MSG["cancel"]))
 
     def save_session(self, session_password):
@@ -329,12 +329,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         self.cur_location.append(self.new_session)
 
-        # Updating sessions.json
-        with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
-            file.write(MSG["encrypt_changed_password"] + json_dumps(self.sessions, ensure_ascii=False, indent=4, sort_keys=False))
-
-        # Writing to sublime-menu file
-        makeSessionMenuFile(self.sessions)
+        updateSesions(self.sessions)
 
 
 class QuickputtyRemove(sublime_plugin.WindowCommand):
@@ -360,18 +355,20 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             sublime.message_dialog(MSG["no_sessions"])
             return
 
-        self.last_location = None
         self.last_index = -1
+        self.last_location = None
         self.cur_location = self.sessions
 
         def choose(index):
-            if index is not None:
-                if index < 0:
-                    return
+            if index == -1:
+                return
+
+            if index >= 0:
 
                 if self.last_location is None:
                     index += 1
 
+                # "***THIS FOLDER***" selected
                 if index == 0:
                     item = self.last_location[self.last_index - 1]
 
@@ -392,10 +389,12 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
                 item = self.cur_location[index - 1]
 
+                # If this is a session:
                 if "children" not in item:
                     if sublime.yes_no_cancel_dialog(
                         "Session \"{}\" ({}) will be deleted. Are you sure?".format(item["name"], item["host"])
                     ) == sublime.DIALOG_YES:
+
                         # User agreed to remove, removing:
                         del self.cur_location[index - 1]
 
@@ -403,21 +402,25 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                         sublime.status_message(MSG["remove_session"].format(name=item["name"]))
 
                         updateSesions(self.sessions)
+
                     else:
                         print(MSG["cancel"])
                         sublime.status_message(MSG["cancel"])
+
                     return
 
+                # Else: it is a folder:
                 self.last_index = index
                 self.last_location = self.cur_location
                 self.cur_location = item["children"]
 
             if self.cur_location == self.sessions:
+                # This is the root of the sessions -> Not asking "***THIS FOLDER***"
                 self.window.show_quick_panel([item["name"] for item in self.cur_location], choose)
             else:
                 self.window.show_quick_panel(["***THIS FOLDER***"] + [item["name"] for item in self.cur_location], choose)
 
-        choose(None)
+        choose(-2)
 
 
 class Files(sublime_plugin.EventListener):
@@ -432,18 +435,23 @@ class Files(sublime_plugin.EventListener):
     #         view.set_read_only(True)
 
     def on_post_save_async(self, view):
+
+        # If the saved file is QuickPuTTY's sessions.json
         if view.file_name() == SESSIONS_PATH:
+
             # (Re-)Creating file for storing sessions
+
+            # Check if this is a file (just in case)
             if os.path.isfile(SESSIONS_PATH):
+
+                # Reading sessions
                 with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
                     try:
                         sessions = sublime.decode_value(file.read().strip())
                     except Exception:
                         sublime.error_message(MSG["invalid_sessions_json"])
                         raise
-                    sessions = checkSessions(sessions)
-                    if sessions is None:
-                        return
+
             else:
                 sessions = []
 
@@ -462,7 +470,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
     def run(self):
         view = sublime.active_window().new_file()
         view.set_read_only(True)
-        view.set_name("QuickPuTTY")
+        view.set_name(PACKAGE_NAME)
         view.add_phantom("test", sublime.Region(0, 0), INSTALL_HTML, sublime.LAYOUT_BELOW, lambda url: sublime.run_command("open_url", args={"url": url}))
 
 
@@ -475,6 +483,7 @@ def onLoad():
 
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
+    # Creating an instance of "Encryption" module
     encryption = QuickPuTTYEncryption(settings.get("encryption_key_one"), settings.get("encryption_key_two"))
 
     # Creating "User file"
@@ -518,21 +527,22 @@ def plugin_loaded():
     TEMPLATE_MENU = sublime.decode_value(TEMPLATE_MENU)
 
     USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
-    USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, "QuickPuTTY")
-    SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "QuickPuTTY.sublime-settings")
+    USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, PACKAGE_NAME)
+    SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, PACKAGE_NAME + ".sublime-settings")
     SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
     MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
-    # # Show README
+    # Show README
     if events.install(PACKAGE_NAME):
         QuickputtyReadme(sublime.active_window()).run()
 
-    sublime.set_timeout_async(onLoad, 500)
+    sublime.set_timeout_async(onLoad, 800)
 
 
 def plugin_unloaded():
     from package_control import events
 
+    # Disable settings check (after saving the file)
     sublime.load_settings(PACKAGE_NAME + ".sublime-settings").clear_on_change("check_settings")
 
     # Removing unnecessary menu file
@@ -548,5 +558,5 @@ def plugin_unloaded():
             try:
                 os.rmdir(USER_PACKAGE_PATH)
             except Exception:
-                sublime.error_message("Can not remove QuickPuTTY user directory.")
+                sublime.error_message("Can not remove {PACKAGE_NAME} user directory.".format(PACKAGE_NAME))
                 raise
