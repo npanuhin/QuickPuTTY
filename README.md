@@ -3,7 +3,7 @@
 <div class="badges" align="center">
 	<a href="https://packagecontrol.io/packages/QuickPuTTY"><img src="https://img.shields.io/badge/WIN-LINUX-f08989?labelColor=99c1f0&style=flat-square&cacheSeconds=260000" alt="WIN|LINUX"></a>
 	<a href="https://packagecontrol.io/packages/QuickPuTTY" target="_blank" title="Package Control: QuickPuTTY"><img src="https://img.shields.io/packagecontrol/dt/QuickPuTTY?color=success&style=flat-square&cacheSeconds=1000"></a>
-	<a href="http://n-panuhin.info/license.html" target="_blank" title="license: MIT"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg?color=informational&style=flat-square&cacheSeconds=260000"></a>
+	<a href="http://npanuhin.me/license.html" target="_blank" title="license: MIT"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg?color=informational&style=flat-square&cacheSeconds=260000"></a>
 	<br>
 </div>
 
@@ -73,7 +73,7 @@ At each stage, you'll see a list of options:
 -------------------------------------------
 
 The plugin was tested on `Windows 10 (1809) x64` and `Ubuntu 18.04.03`.
-If you have found a bug or mistake, you are very welcome to contact me on [n-panuhin.info](https://n-panuhin.info "Visit n-panuhin.info") or open a [new GitHub issue](https://github.com/Nikita-Panyuhin/QuickPuTTY/issues/new "Open QuickPuTTY GitHub Issues").
+If you have found a bug or mistake, you are very welcome to contact me on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me") or open a [new GitHub issue](https://github.com/Nikita-Panyuhin/QuickPuTTY/issues/new "Open QuickPuTTY GitHub Issues").
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
 
@@ -81,4 +81,4 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 
 Copyright &copy; 2020 Nikita Paniukhin
 
-License: [MIT](http://n-panuhin.info/license.html "Visit n-panuhin.info/license")
+License: [MIT](http://npanuhin.me/license.html "Visit npanuhin.me/license")
