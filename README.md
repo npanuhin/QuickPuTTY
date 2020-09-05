@@ -22,7 +22,7 @@ See how fast you can start an SSH session **without entering username and passwo
 
 The plugin is available on [Package Control](https://packagecontrol.io/packages/QuickPuTTY "Visit QuickPuTTY page on packagecontrol.io") and can be installed in this way:
 
-1.  Press `Ctrl + Shift + P`, then enter `Package Control: Install Package` (or just `ins`)
+1.  Press <kbd>Ctrl + Shift + P</kbd>, then enter `Package Control: Install Package` (or just `ins`)
 2.  Choose `QuickPuTTY` in the list of available packages
 
 After installation, you can change encryption keys in plugin settings (looking through all settings may be useful):
