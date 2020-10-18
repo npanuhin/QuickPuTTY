@@ -69,7 +69,6 @@ At each stage, you'll see a list of options:
 |        {folder_1}       |            Select a folder name to navigate into it                 |
 |          . . .          |                             . . .                                   |
 
-
 -------------------------------------------
 
 The plugin was tested on `Windows 10 (1809) x64` and `Ubuntu 18.04.03`.

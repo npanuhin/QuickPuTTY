@@ -8,7 +8,7 @@ from subprocess import Popen
 import os
 from re import match as re_match
 from copy import deepcopy
-from json import dump as json_dump, dumps as json_dumps, load as json_load
+from json import dump as json_dump, dumps as json_dumps
 
 from .messages.QuickPuTTY_text import MSG, TEMPLATE_MENU, INSTALL_HTML
 
