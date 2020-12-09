@@ -7,16 +7,15 @@
 	<br>
 </div>
 
-*QuickPuTTY* is a plugin for Sublime Text 3 that allows you to save SSH sessions for quick access to them.
+***QuickPuTTY*** is a plugin for [Sublime Text 3](https://www.sublimetext.com "Visit sublimetext.com") that allows you to save SSH sessions for quick access to them. It will be very useful to those who often use SSH.
 
-Plugin will be useful to those who often use SSH.
+It supports folders with a unique navigation system, making it easy to add, remove or edit sessions on the go (manual JSON editing is also possible).
+
 Works with a free and open-source terminal emulator [PuTTY](https://putty.org "Visit putty.org").
-
-**New!** Folders supported.
 
 See how fast you can start an SSH session **without entering username and password**:
 
-![](./messages/usage.gif)
+![](./media/usage.gif)
 
 <h2>Installation</h2>
 
@@ -29,7 +28,7 @@ After installation, you can change encryption keys in plugin settings (looking t
 
 Go to `Preferences > Package Settings > QuickPuTTY > Settings` in the nav-bar.
 
-![](./messages/installation.gif)
+![](./media/installation.gif)
 
 ## Usage
 
@@ -72,7 +71,7 @@ At each stage, you'll see a list of options:
 -------------------------------------------
 
 The plugin was tested on `Windows 10 (1809) x64` and `Ubuntu 18.04.03`.
-If you have found a bug or mistake, you are very welcome to contact me on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me") or open a [new GitHub issue](https://github.com/Nikita-Panyuhin/QuickPuTTY/issues/new "Open QuickPuTTY GitHub Issues").
+If you have found a bug, mistake, or a typo, you are very welcome to contact me on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me") or open a [new GitHub issue](https://github.com/npanuhin/QuickPuTTY/issues/new "Open QuickPuTTY GitHub Issues").
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
 
