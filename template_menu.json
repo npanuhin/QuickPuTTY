@@ -1,0 +1,32 @@
+[
+    {
+        "caption": "PuTTY",
+        "mnemonic": "u",
+        "id": "putty",
+        "children": [
+            // If you want, you can add an option to only run PuTTY (without connecting to certain server):
+            // {
+            //     "caption": "Open PuTTY",
+            //     "command": "quickputty_open"
+            // },
+            // { "caption": "-" },
+            {
+                "caption": "New session/folder",
+                "command": "quickputty_new",
+                "mnemonic": "N"
+            },
+            {
+                "caption": "Manage sessions",
+                "command": "open_file",
+                "args": {"file": "${packages}/User/QuickPuTTY/sessions.json"},
+                "mnemonic": "M"
+            },
+            {
+                "caption": "Remove session/folder",
+                "command": "quickputty_remove",
+                "mnemonic": "R"
+            },
+            { "caption": "-" }
+        ]
+    }
+]

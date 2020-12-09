@@ -10,9 +10,8 @@ from re import match as re_match
 from copy import deepcopy
 from json import dump as json_dump, dumps as json_dumps
 
-from .messages.QuickPuTTY_text import MSG, TEMPLATE_MENU, INSTALL_HTML
-
-# If you want to edit default settings: !!!(currently disabled)!!!
+# !!! The option below is currently disabled !!!
+# If you want to edit default settings:
 # Go to "class Session > def on_load" and change "view.set_read_only(True)" to False (or comment this line)
 
 PACKAGE_NAME = "QuickPuTTY"
@@ -517,14 +516,20 @@ def plugin_loaded():
     import sublime
     from package_control import events
 
+    global MSG
     global USER_DATA_PATH
     global USER_PACKAGE_PATH
     global SETTINGS_PATH
     global SESSIONS_PATH
     global MENU_PATH
     global TEMPLATE_MENU
+    global INSTALL_HTML
 
-    TEMPLATE_MENU = sublime.decode_value(TEMPLATE_MENU)
+    MSG = sublime.decode_value(sublime.load_resource("Packages/QuickPuTTY/communication.json"))
+
+    TEMPLATE_MENU = sublime.decode_value(sublime.load_resource("Packages/QuickPuTTY/template_menu.json"))
+
+    INSTALL_HTML = sublime.load_resource("Packages/QuickPuTTY/installation.html")
 
     USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
     USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, PACKAGE_NAME)
