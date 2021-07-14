@@ -1,6 +1,6 @@
-#  Copyright (c) 2020 Nikita Paniukhin  |
+#  Copyright (c) 2021 Nikita Paniukhin  |
 #     Licensed under the MIT license    |
-# ---------------------------------------
+# --------------------------------------+
 
 import sublime
 import sublime_plugin
@@ -21,13 +21,13 @@ IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::
 USER_DATA_PATH, USER_PACKAGE_PATH, SETTINGS_PATH, SESSIONS_PATH, MENU_PATH = None, None, None, None, None
 
 
-def mkpath(*paths) -> str:
+def mkpath(*paths: str) -> str:
     '''Combines paths and normalizes the result'''
     return os.path.normpath(os.path.join(*paths))
 
 
 class QuickPuTTYEncryption:
-    def __init__(self, key_one: int, key_two: str):
+    def __init__(self, key_one: int, key_two: str) -> None:
         self.ASCII_SIZE = 1114159
         self.alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.key_one = key_one
@@ -54,7 +54,7 @@ class QuickPuTTYEncryption:
 # encryption = QuickPuTTYEncryption(key_one, key_two)
 # encrypted = encryption.encrypt(string)
 # decrypted = encryption.decrypt(encrypted)
-# print("\"{}\" vs \"{}\"".format(encrypted, decrypted))
+# print('"{}" vs "{}"'.format(encrypted, decrypted))
 
 
 def makeSessionMenuFile(sessions: list) -> None:
@@ -79,6 +79,7 @@ def makeSessionMenuFile(sessions: list) -> None:
 
         if "login" in item and item["login"]:
             result["args"]["login"] = item["login"]
+
         if "password" in item and item["password"]:
             result["args"]["password"] = item["password"]
 
@@ -89,7 +90,7 @@ def makeSessionMenuFile(sessions: list) -> None:
     for item in sessions:
         data[0]["children"].append(build(item))
 
-    with open(MENU_PATH, "w", encoding="utf-8") as file:
+    with open(MENU_PATH, 'w', encoding="utf-8") as file:
         json_dump(data, file, ensure_ascii=False, indent=4, sort_keys=False)
 
     print(MSG["reload"])
@@ -174,7 +175,7 @@ def checkSettings() -> bool:
 
 def updateSesions(sessions):
     '''Stores sessions to "sessions.json" and creates a .sublime-menu file'''
-    with open(SESSIONS_PATH, "w", encoding="utf-8") as file:
+    with open(SESSIONS_PATH, 'w', encoding="utf-8") as file:
         file.write(MSG["encrypt_changed_password"] + json_dumps(sessions, ensure_ascii=False, indent=4, sort_keys=False))
     makeSessionMenuFile(sessions)
 
@@ -183,7 +184,7 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
     '''Responsible for opening PuTTY.
        Handles "quickputty_open" command.'''
 
-    def run(self, host: str = None, port: int = 22, login: str = "", password: str = "0") -> None:
+    def run(self, host: str = None, port: int = 22, login: str = "", password: str = '0') -> None:
         run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
 
         if host is None:
@@ -203,7 +204,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
        Handles "quickputty_new" command.'''
 
     def run(self):
-        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
             try:
                 self.sessions = sublime.decode_value(file.read().strip())
             except Exception:
@@ -337,7 +338,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
     def run(self):
         # Get sessions
-        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
             try:
                 self.sessions = sublime.decode_value(file.read().strip())
             except Exception:
@@ -444,7 +445,7 @@ class Files(sublime_plugin.EventListener):
             if os.path.isfile(SESSIONS_PATH):
 
                 # Reading sessions
-                with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
+                with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
                     try:
                         sessions = sublime.decode_value(file.read().strip())
                     except Exception:
@@ -473,7 +474,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
         view.add_phantom("test", sublime.Region(0, 0), INSTALL_HTML, sublime.LAYOUT_BELOW, lambda url: sublime.run_command("open_url", args={"url": url}))
 
 
-def onLoad():
+def onLoad() -> None:
     global encryption
 
     # Check settings
@@ -491,7 +492,7 @@ def onLoad():
 
     # (Re-)Creating file for storing sessions
     if os.path.isfile(SESSIONS_PATH):
-        with open(SESSIONS_PATH, "r", encoding="utf-8") as file:
+        with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
             try:
                 sessions = sublime.decode_value(file.read().strip())
             except Exception:
@@ -511,7 +512,7 @@ def onLoad():
     updateSesions(sessions)
 
 
-def plugin_loaded():
+def plugin_loaded() -> None:
     # Initialization
     import sublime
     from package_control import events
@@ -544,7 +545,7 @@ def plugin_loaded():
     sublime.set_timeout_async(onLoad, 800)
 
 
-def plugin_unloaded():
+def plugin_unloaded() -> None:
     from package_control import events
 
     # Disable settings check (after saving the file)

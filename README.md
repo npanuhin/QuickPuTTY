@@ -77,6 +77,6 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 
 -------------------------------------------
 
-Copyright &copy; 2020 Nikita Paniukhin
+Copyright &copy; 2021 Nikita Paniukhin
 
 License: [MIT](http://npanuhin.me/license.html "Visit npanuhin.me/license")
