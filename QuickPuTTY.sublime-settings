@@ -2,10 +2,6 @@
 	// This command is used, to run PuTTY (You can specify path to the executable)
 	"PuTTY_run_command" : "putty",
 
-	// Clear all QuickPuTTY user files when removing package.
-	// Currently this includes user settings and stored sessions.
-	"clear_on_remove": false,
-
 	// These keys are used to encrypt passwords. Of course you can change them.
 	// (the smaller they are, the shorter the result string will be)
 	// WARNING!!!

@@ -18,12 +18,17 @@ PACKAGE_NAME = "QuickPuTTY"
 
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
-USER_DATA_PATH, USER_PACKAGE_PATH, SETTINGS_PATH, SESSIONS_PATH, MENU_PATH = None, None, None, None, None
-
 
 def mkpath(*paths: str) -> str:
     '''Combines paths and normalizes the result'''
     return os.path.normpath(os.path.join(*paths))
+
+
+USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
+USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, PACKAGE_NAME)
+SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, PACKAGE_NAME + ".sublime-settings")
+SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
+MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
 
 class QuickPuTTYEncryption:
@@ -144,8 +149,7 @@ def checkSettings() -> bool:
     if not (
         settings.has("encryption_key_one") and
         settings.has("encryption_key_two") and
-        settings.has("PuTTY_run_command") and
-        settings.has("clear_on_remove")
+        settings.has("PuTTY_run_command")
     ):
         sublime.error_message(MSG["setting_not_found"])
         return False
@@ -157,11 +161,6 @@ def checkSettings() -> bool:
     # Checking encryption keys
     if not isinstance(settings.get("encryption_key_one"), int) or not isinstance(settings.get("encryption_key_two"), str):
         sublime.error_message(MSG["bad_keys"])
-        return False
-
-    # Checking "clear_on_remove" setting
-    if not isinstance(settings.get("clear_on_remove"), bool):
-        sublime.error_message(MSG["bad_clear_on_remove"])
         return False
 
     # Checking "PuTTY_run_command" setting
@@ -475,6 +474,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
 
 
 def onLoad() -> None:
+    '''This function can run asynchronously at startup'''
     global encryption
 
     # Check settings
@@ -487,8 +487,7 @@ def onLoad() -> None:
     encryption = QuickPuTTYEncryption(settings.get("encryption_key_one"), settings.get("encryption_key_two"))
 
     # Creating "User file"
-    if not os.path.isdir(USER_PACKAGE_PATH):
-        os.mkdir(mkpath(USER_PACKAGE_PATH))
+    os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)
 
     # (Re-)Creating file for storing sessions
     if os.path.isfile(SESSIONS_PATH):
@@ -513,56 +512,34 @@ def onLoad() -> None:
 
 
 def plugin_loaded() -> None:
-    # Initialization
-    import sublime
-    from package_control import events
+    # import sublime
+    # from package_control import events
 
     global MSG
-    global USER_DATA_PATH
-    global USER_PACKAGE_PATH
-    global SETTINGS_PATH
-    global SESSIONS_PATH
-    global MENU_PATH
     global TEMPLATE_MENU
     global INSTALL_HTML
 
     MSG = sublime.decode_value(sublime.load_resource("Packages/QuickPuTTY/communication.json"))
-
     TEMPLATE_MENU = sublime.decode_value(sublime.load_resource("Packages/QuickPuTTY/template_menu.json"))
-
     INSTALL_HTML = sublime.load_resource("Packages/QuickPuTTY/installation.html")
 
-    USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
-    USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, PACKAGE_NAME)
-    SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, PACKAGE_NAME + ".sublime-settings")
-    SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
-    MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
-
     # Show README
-    if events.install(PACKAGE_NAME):
+    try:
+        sublime.load_resource("Packages/User/QuickPuTTY/sessions.json")
+    except FileNotFoundError:
         QuickputtyReadme(sublime.active_window()).run()
 
-    sublime.set_timeout_async(onLoad, 800)
+    # if events.install(PACKAGE_NAME):
+    #     QuickputtyReadme(sublime.active_window()).run()
+
+    onLoad()
+    # sublime.set_timeout_async(onLoad, 800)
 
 
 def plugin_unloaded() -> None:
-    from package_control import events
-
     # Disable settings check (after saving the file)
     sublime.load_settings(PACKAGE_NAME + ".sublime-settings").clear_on_change("check_settings")
 
-    # Removing unnecessary menu file
+    # Removing menu file
     if os.path.exists(MENU_PATH):
         os.remove(MENU_PATH)
-
-    if events.remove(PACKAGE_NAME):
-        # If setting "clear_on_remove" is True:
-        if sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("clear_on_remove", False):
-            # Removing sessions.json
-            os.remove(SESSIONS_PATH)
-            # Trying to remove QuickPuTTY user directory
-            try:
-                os.rmdir(USER_PACKAGE_PATH)
-            except Exception:
-                sublime.error_message("Can not remove {PACKAGE_NAME} user directory.".format(PACKAGE_NAME))
-                raise
