@@ -31,40 +31,8 @@ SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
 
-class QuickPuTTYEncryption:
-    def __init__(self, key_one: int, key_two: str) -> None:
-        self.ASCII_SIZE = 1114159
-        self.alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        self.key_one = key_one
-        self.key_two = sum(ord(key_two[i]) * (self.ASCII_SIZE ** i) for i in range(len(key_two))) % self.key_one
-
-    def base_36(self, num: int) -> str:
-        return self.alphabet[num] if num < 36 else self.base_36(num // 36) + self.alphabet[num % 36]
-
-    def encrypt(self, string: str) -> str:
-        res = sum([(ord(string[i]) + self.key_one) * ((self.ASCII_SIZE + self.key_one + self.key_two) ** i) for i in range(len(string))])
-        return self.base_36(res)
-
-    def decrypt(self, string: str) -> str:
-        string = int(string, 36)
-        result = []
-        while string > 0:
-            string, letter = divmod(string, (self.ASCII_SIZE + self.key_one + self.key_two))
-            result.append(chr(letter - self.key_one))
-        return "".join(result)
-
-
-# Encryption test:
-# key_one, key_two, string = 42, "my_key", "You can't read this line. TOP SECRET"
-# encryption = QuickPuTTYEncryption(key_one, key_two)
-# encrypted = encryption.encrypt(string)
-# decrypted = encryption.decrypt(encrypted)
-# print('"{}" vs "{}"'.format(encrypted, decrypted))
-
-
 def makeSessionMenuFile(sessions: list) -> None:
-    '''Creates a .sublime-menu file containing given sessions (from a template).
-       Takes an encrypted password'''
+    '''Creates a .sublime-menu file containing given sessions from a template'''
 
     def build(item):
         if "children" in item:
@@ -103,7 +71,7 @@ def makeSessionMenuFile(sessions: list) -> None:
 
 
 def checkSessions(sessions: list) -> list:
-    '''Checks whether the session format is correct and encrypts the password'''
+    '''Checks whether the format of the sessions is correct'''
 
     def check(ss):
         if type(ss) is not list:
@@ -125,12 +93,6 @@ def checkSessions(sessions: list) -> list:
                         ("password" in ss[i] and type(ss[i]["password"]) is not str)):
                     return None
 
-                # Encrypting password
-                if "encrypt" in ss[i]:
-                    del ss[i]["encrypt"]
-                    if "password" in ss[i]:
-                        ss[i]["password"] = encryption.encrypt(ss[i]["password"])
-
         return ss
 
     new_sessions = check(deepcopy(sessions))
@@ -143,25 +105,17 @@ def checkSessions(sessions: list) -> list:
 
 def checkSettings() -> bool:
     '''Checks whether the session format is correct'''
+
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
     # Check if all settings exist
-    if not (
-        settings.has("encryption_key_one") and
-        settings.has("encryption_key_two") and
-        settings.has("PuTTY_run_command")
-    ):
+    if not settings.has("PuTTY_run_command"):
         sublime.error_message(MSG["setting_not_found"])
         return False
 
     # Adding handler
     settings.clear_on_change("check_settings")
     settings.add_on_change("check_settings", checkSettings)
-
-    # Checking encryption keys
-    if not isinstance(settings.get("encryption_key_one"), int) or not isinstance(settings.get("encryption_key_two"), str):
-        sublime.error_message(MSG["bad_keys"])
-        return False
 
     # Checking "PuTTY_run_command" setting
     if not isinstance(settings.get("PuTTY_run_command"), str):
@@ -175,7 +129,7 @@ def checkSettings() -> bool:
 def updateSesions(sessions):
     '''Stores sessions to "sessions.json" and creates a .sublime-menu file'''
     with open(SESSIONS_PATH, 'w', encoding="utf-8") as file:
-        file.write(MSG["encrypt_changed_password"] + json_dumps(sessions, ensure_ascii=False, indent=4, sort_keys=False))
+        file.write(json_dumps(sessions, ensure_ascii=False, indent=4, sort_keys=False))
     makeSessionMenuFile(sessions)
 
 
@@ -189,7 +143,6 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
         if host is None:
             Popen([run_command])
         else:
-            password = encryption.decrypt(password)
             command = [run_command, "-ssh", host, "-P", str(port)]
             if login:
                 command += ["-l", login]
@@ -324,7 +277,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
     def save_session(self, session_password):
         # Saving password
         if session_password.strip():
-            self.new_session["password"] = encryption.encrypt(session_password.strip())
+            self.new_session["password"] = session_password.strip()
 
         self.cur_location.append(self.new_session)
 
@@ -475,16 +428,9 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
 
 def onLoad() -> None:
     '''This function can run asynchronously at startup'''
-    global encryption
-
     # Check settings
     if not checkSettings():
         return
-
-    settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
-
-    # Creating an instance of "Encryption" module
-    encryption = QuickPuTTYEncryption(settings.get("encryption_key_one"), settings.get("encryption_key_two"))
 
     # Creating "User file"
     os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)
@@ -512,7 +458,6 @@ def onLoad() -> None:
 
 
 def plugin_loaded() -> None:
-    # import sublime
     # from package_control import events
 
     global MSG

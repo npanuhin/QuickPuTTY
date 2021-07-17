@@ -6,12 +6,9 @@
     "already_has_this": "A session with that name already exists. Please choose a different name or change an existing one.",
     "wrong_port": "Server port must be a natural number.",
     "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!",
-    "encrypt_changed_password": "// If you change the password, specify (\"encrypt\": {something, e.g. true}) as one of the session parameters\n",
     "invalid_json": "Sublime Text cannot decode JSON. Please check file for errors.",
     "invalid_sessions_json": "Sublime Text cannot decode JSON in sessions.json file. Please check it for errors.",
     "invalid_sessions": "Session format is invalid. Restart QuickPuTTY or delete \"sessions.json\" file in Preferences -> Browse Packages -> User/QuickPuTTY/sessions.json",
     "setting_not_found": "Some settings keys were not found in QuickPuTTY.sublime-settings. Try reinstalling QuickPuTTY (if \"clear_on_remove\" is False, sessions will not be deleted)",
-    "bad_keys": "The encryption keys specified in the settings are incorrect. Change them and restart QuickPuTTY (or Sublime Text).",
-    "bad_clear_on_remove": "The setting \"clear_on_remove\" is incorrect. Please check that the value is of type bool (true or false).",
     "bad_PuTTY_run_command": "The setting \"PuTTY_run_command\" is incorrect. Please check that the value is of type str (string)."
 }
