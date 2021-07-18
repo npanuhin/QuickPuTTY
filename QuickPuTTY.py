@@ -8,7 +8,7 @@ from subprocess import Popen
 import os
 from re import match as re_match
 from copy import deepcopy
-from json import dump as json_dump, dumps as json_dumps
+from json import dump as json_dump
 
 # !!! The option below is currently disabled !!!
 # If you want to edit default settings:
@@ -24,8 +24,7 @@ def mkpath(*paths: str) -> str:
     return os.path.normpath(os.path.join(*paths))
 
 
-USER_DATA_PATH = mkpath(sublime.packages_path(), "User")
-USER_PACKAGE_PATH = mkpath(USER_DATA_PATH, PACKAGE_NAME)
+USER_PACKAGE_PATH = mkpath(sublime.packages_path(), "User", PACKAGE_NAME)
 SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, PACKAGE_NAME + ".sublime-settings")
 SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
@@ -60,8 +59,7 @@ def makeSessionMenuFile(sessions: list) -> None:
 
     data = deepcopy(TEMPLATE_MENU)
 
-    for item in sessions:
-        data[0]["children"].append(build(item))
+    data[0]["children"] += (build(item) for item in sessions)
 
     with open(MENU_PATH, 'w', encoding="utf-8") as file:
         json_dump(data, file, ensure_ascii=False, indent=4, sort_keys=False)
@@ -73,38 +71,43 @@ def makeSessionMenuFile(sessions: list) -> None:
 def checkSessions(sessions: list) -> list:
     '''Checks whether the format of the sessions is correct'''
 
-    def check(ss):
-        if type(ss) is not list:
+    def check(sessions):
+        if not isinstance(sessions, list):
             return None
 
-        for i in range(len(ss)):
-            if (type(ss[i]) is not dict or
-                    "name" not in ss[i] or type(ss[i]["name"]) is not str):
+        for item in sessions:
+            if (
+                not isinstance(item, dict) or
+                "name" not in item or not isinstance(item["name"], str)
+            ):
                 return None
 
-            if "children" in ss[i]:
-                ss[i]["children"] = check(ss[i]["children"])
-                if ss[i] is None:
+            if "children" in item:
+                item["children"] = check(item["children"])
+                if item is None:
                     return None
             else:
-                if ("host" not in ss[i] or type(ss[i]["host"]) is not str or
-                    "port" not in ss[i] or type(ss[i]["port"]) is not int or
-                        ("login" in ss[i] and type(ss[i]["login"]) is not str) or
-                        ("password" in ss[i] and type(ss[i]["password"]) is not str)):
+                if (
+                    "host" not in item or not isinstance(item["host"], str) or
+                    "port" not in item or not isinstance(item["port"], int) or
+                    ("login" in item and not isinstance(item["login"], str)) or
+                    ("password" in item and not isinstance(item["password"], str))
+                ):
                     return None
 
-        return ss
+        return sessions
 
     new_sessions = check(deepcopy(sessions))
 
     if new_sessions is None:
         sublime.error_message(MSG["invalid_sessions"])
         return None
+
     return new_sessions
 
 
 def checkSettings() -> bool:
-    '''Checks whether the session format is correct'''
+    '''Checks whether the format of the settings is correct'''
 
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
 
@@ -129,13 +132,13 @@ def checkSettings() -> bool:
 def updateSesions(sessions):
     '''Stores sessions to "sessions.json" and creates a .sublime-menu file'''
     with open(SESSIONS_PATH, 'w', encoding="utf-8") as file:
-        file.write(json_dumps(sessions, ensure_ascii=False, indent=4, sort_keys=False))
+        json_dump(sessions, file, ensure_ascii=False, indent=4, sort_keys=False)
+
     makeSessionMenuFile(sessions)
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
-    '''Responsible for opening PuTTY.
-       Handles "quickputty_open" command.'''
+    '''Responsible for opening PuTTY'''
 
     def run(self, host: str = None, port: int = 22, login: str = "", password: str = '0') -> None:
         run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
