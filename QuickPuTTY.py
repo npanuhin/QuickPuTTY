@@ -19,7 +19,7 @@ PACKAGE_NAME = "QuickPuTTY"
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
 
 
-def mkpath(*paths: str) -> str:
+def mkpath(*paths):
     '''Combines paths and normalizes the result'''
     return os.path.normpath(os.path.join(*paths))
 
@@ -30,7 +30,7 @@ SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
 
-def makeSessionMenuFile(sessions: list) -> None:
+def makeSessionMenuFile(sessions):
     '''Creates a .sublime-menu file containing given sessions from a template'''
 
     def build(item):
@@ -68,7 +68,7 @@ def makeSessionMenuFile(sessions: list) -> None:
     sublime.status_message(MSG["reload"])
 
 
-def checkSessions(sessions: list) -> list:
+def checkSessions(sessions):
     '''Checks whether the format of the sessions is correct'''
 
     def check(sessions):
@@ -106,7 +106,7 @@ def checkSessions(sessions: list) -> list:
     return new_sessions
 
 
-def checkSettings() -> bool:
+def checkSettings():
     '''Checks whether the format of the settings is correct'''
 
     settings = sublime.load_settings(PACKAGE_NAME + ".sublime-settings")
@@ -140,7 +140,7 @@ def updateSesions(sessions):
 class QuickputtyOpen(sublime_plugin.WindowCommand):
     '''Responsible for opening PuTTY'''
 
-    def run(self, host: str = None, port: int = 22, login: str = "", password: str = '0') -> None:
+    def run(self, host=None, port=22, login="", password='0'):
         run_command = sublime.load_settings(PACKAGE_NAME + ".sublime-settings").get("PuTTY_run_command")
 
         if host is None:
@@ -429,7 +429,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
         view.add_phantom("test", sublime.Region(0, 0), INSTALL_HTML, sublime.LAYOUT_BELOW, lambda url: sublime.run_command("open_url", args={"url": url}))
 
 
-def onLoad() -> None:
+def onLoad():
     '''This function can run asynchronously at startup'''
     # Check settings
     if not checkSettings():
@@ -460,7 +460,7 @@ def onLoad() -> None:
     updateSesions(sessions)
 
 
-def plugin_loaded() -> None:
+def plugin_loaded():
     # from package_control import events
 
     global MSG
@@ -484,7 +484,7 @@ def plugin_loaded() -> None:
     # sublime.set_timeout_async(onLoad, 800)
 
 
-def plugin_unloaded() -> None:
+def plugin_unloaded():
     # Disable settings check (after saving the file)
     sublime.load_settings(PACKAGE_NAME + ".sublime-settings").clear_on_change("check_settings")
 
