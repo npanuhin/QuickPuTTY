@@ -3,13 +3,20 @@
         "caption": "PuTTY",
         "mnemonic": "u",
         "id": "putty",
+
+        "pure_PuTTY_enabled": [
+            // Optionally, you can add an option to run PuTTY
+            // without connecting to a specific server.
+            // Toggle the "pure_PuTTY_enabled" setting to achieve this.
+            {
+                "caption": "Open PuTTY",
+                "command": "quickputty_open",
+                "mnemonic": "O"
+            },
+            { "caption": "-" },
+        ],
+
         "children": [
-            // If you want, you can add an option to only run PuTTY (without connecting to certain server):
-            // {
-            //     "caption": "Open PuTTY",
-            //     "command": "quickputty_open"
-            // },
-            // { "caption": "-" },
             {
                 "caption": "New session/folder",
                 "command": "quickputty_new",

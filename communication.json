@@ -1,14 +1,31 @@
+//  Copyright (c) 2020-2021 Nikita Paniukhin  │
+//       Licensed under the MIT license       │
+// ───────────────────────────────────────────┘
+
 {
-    "cancel": "QuickPuTTY: Canceled",
-    "reload": "QuickPuTTY: Sessions reloaded",
-    "remove_session": "QuickPuTTY: Session \"{name}\" was removed",
-    "remove_folder": "QuickPuTTY: Folder \"{name}\" was removed",
-    "already_has_this": "A session with that name already exists. Please choose a different name or change an existing one.",
-    "wrong_port": "Server port must be a natural number.",
-    "no_sessions": "You have not saved any sessions :(\nGo to \"PuTTY > New session\" to add one!",
-    "invalid_json": "Sublime Text cannot decode JSON. Please check file for errors.",
-    "invalid_sessions_json": "Sublime Text cannot decode JSON in sessions.json file. Please check it for errors.",
-    "invalid_sessions": "Session format is invalid. Restart QuickPuTTY or delete \"sessions.json\" file in Preferences -> Browse Packages -> User/QuickPuTTY/sessions.json",
-    "setting_not_found": "Some settings keys were not found in QuickPuTTY.sublime-settings. Try reinstalling QuickPuTTY (if \"clear_on_remove\" is False, sessions will not be deleted)",
-    "bad_PuTTY_run_command": "The setting \"PuTTY_run_command\" is incorrect. Please check that the value is of type str (string)."
+    "cancel": "{package_name}: Canceled",
+
+    "sessions_reloaded": "{package_name}: Sessions reloaded",
+
+    "session_created": "{package_name}: Session \"{name}\" ({host}){location} was created",
+    "folder_created": "{package_name}: Folder \"{name}\"{location} was created",
+
+    "session_removed": "{package_name}: Session \"{name}\" ({host}) was removed",
+    "folder_removed": "{package_name}: Folder \"{name}\" ({subitems_count} subitems) was removed",
+
+    "session_already_exists": "A session with that name already exists. Please choose a different name.",
+    "wrong_port": "Server port must be a non-negative integer",
+
+    "nothing_to_remove": "You have not saved any sessions(\n\nGo to \"PuTTY > New session\" to add one!",
+
+    // "invalid_json": "Sublime Text cannot decode JSON. Please check file for errors.",
+    "invalid_sessions_json": "Sublime Text can not decode JSON in sessions.json file. Please check it for errors and reload QuickPuTTY or Sublime Text.",
+    "invalid_sessions": "Invalid sessions format. Please fix the error and restart QuickPuTTY or Sublime Text.\n\nIf you can not fix this error, delete \"sessions.json\" file by going to Preferences -> Browse Packages -> \"User/QuickPuTTY/sessions.json\"",
+
+    "setting_not_found": "Some settings keys were not found in QuickPuTTY.sublime-settings.\n\nReload QuickPuTTY or Sublime Text.\n\nIf you can not fix this error, reinstall QuickPuTTY.",
+
+    "invalid_PuTTY_exec": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type str (string) or list[str].\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
+    "invalid_pure_PuTTY_enabled": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type bool (boolean: true/false).\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
+
+    "assertion_failed": "{package_name}: Assertion failed"
 }

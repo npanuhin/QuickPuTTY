@@ -1,4 +1,7 @@
 {
 	// This command is used, to run PuTTY (You can specify path to the executable)
-	"PuTTY_run_command" : "putty"
+	"PuTTY_exec": "putty",
+
+	// Enable the "Open PuTTY" option (just open the app without any session) in the nav-bar
+	"pure_PuTTY_enabled": true
 }
