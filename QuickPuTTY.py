@@ -482,7 +482,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
         )
 
 
-def plugin_loaded():
+def onLoad():
     '''This function should run asynchronously on plugin startup'''
 
     global MSG
@@ -519,6 +519,10 @@ def plugin_loaded():
     os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)
 
     reloadSessions()
+
+
+def plugin_loaded():
+    sublime.set_timeout_async(onLoad)
 
 
 def plugin_unloaded():
