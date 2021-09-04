@@ -9,6 +9,7 @@ from json import dump as json_dump
 from re import match as re_match, sub as re_sub
 from subprocess import Popen
 from copy import deepcopy
+from time import sleep
 import os
 
 
@@ -487,6 +488,13 @@ def plugin_loaded():
     global MSG
     global TEMPLATE_MENU
     global INSTALL_HTML
+
+    while True:
+        try:
+            sublime.load_resource("Packages/{}/communication.json".format(PACKAGE_NAME))
+            break
+        except FileNotFoundError:
+            sleep(0.1)
 
     MSG = sublime.decode_value(sublime.load_resource("Packages/{}/communication.json".format(PACKAGE_NAME)))
     TEMPLATE_MENU = sublime.decode_value(sublime.load_resource("Packages/{}/template_menu.json".format(PACKAGE_NAME)))
