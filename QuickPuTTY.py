@@ -35,7 +35,7 @@ def mkpath(*paths):
 
 
 USER_PACKAGE_PATH = mkpath(sublime.packages_path(), "User", PACKAGE_NAME)
-SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, "{}.sublime-settings".format(PACKAGE_NAME))
+SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, f"{PACKAGE_NAME}.sublime-settings")
 SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
@@ -59,7 +59,7 @@ def sublimePrint(string, debug=True):
 def getSettings():
     '''Checks whether the format of the settings is correct. Returns settings object or None'''
 
-    settings = sublime.load_settings("{}.sublime-settings".format(PACKAGE_NAME))
+    settings = sublime.load_settings(f"{PACKAGE_NAME}.sublime-settings")
 
     # Check if all settings exist
     if not sublimeAssert(
@@ -180,7 +180,7 @@ def reloadSessions():
     # Renewing file for storing sessions
     sessions = None
     if os.path.isfile(SESSIONS_PATH):
-        with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
+        with open(SESSIONS_PATH, encoding="utf-8") as file:
             try:
                 sessions = sublime.decode_value(file.read())  # Note: the result can also be None
             except Exception:
@@ -221,7 +221,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
     '''Responsible for creating new sessions and folders'''
 
     def run(self):
-        with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
+        with open(SESSIONS_PATH, encoding="utf-8") as file:
             try:
                 self.sessions = sublime.decode_value(file.read())  # Note: the result can also be None
             except Exception:
@@ -366,7 +366,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
     '''Responsible for removing sessions and folders'''
 
     def run(self):
-        with open(SESSIONS_PATH, 'r', encoding="utf-8") as file:
+        with open(SESSIONS_PATH, encoding="utf-8") as file:
             try:
                 self.sessions = sublime.decode_value(file.read())  # Note: the result can also be None
             except Exception:
@@ -491,21 +491,21 @@ def onLoad():
 
     while True:
         try:
-            sublime.load_resource("Packages/{}/communication.json".format(PACKAGE_NAME))
+            sublime.load_resource(f"Packages/{PACKAGE_NAME}/communication.json")
             break
         except FileNotFoundError:
             sleep(0.1)
 
-    MSG = sublime.decode_value(sublime.load_resource("Packages/{}/communication.json".format(PACKAGE_NAME)))
-    TEMPLATE_MENU = sublime.decode_value(sublime.load_resource("Packages/{}/template_menu.json".format(PACKAGE_NAME)))
-    INSTALL_HTML = sublime.load_resource("Packages/{}/installation.html".format(PACKAGE_NAME))
+    MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/communication.json"))
+    TEMPLATE_MENU = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/template_menu.json"))
+    INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/installation.html")
 
     for key, value in MSG.items():
         MSG[key] = re_sub(r"{([\w\d_]+)}", r"{{\1}}", value).replace(r"{{package_name}}", r"{package_name}").format(package_name=PACKAGE_NAME)
 
     # Show README
     try:
-        sublime.load_resource("Packages/User/{}/sessions.json".format(PACKAGE_NAME))
+        sublime.load_resource(f"Packages/User/{PACKAGE_NAME}/sessions.json")
     except FileNotFoundError:
         QuickputtyReadme(sublime.active_window()).run()
 
