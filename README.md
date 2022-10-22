@@ -1,6 +1,6 @@
 <!--
 ┌───────────────────────────────────────────┐
-│ Copyright (c) 2020-2021 Nikita Paniukhin  │
+│ Copyright (c) 2020-2022 Nikita Paniukhin  │
 │      Licensed under the MIT license       │
 └───────────────────────────────────────────┘
 -->
@@ -81,6 +81,6 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 
 -------------------------------------------
 
-Copyright © 2021 Nikita Paniukhin
+Copyright © 2022 Nikita Paniukhin
 
 License: [MIT](http://npanuhin.me/license "Visit https://npanuhin.me/license")
