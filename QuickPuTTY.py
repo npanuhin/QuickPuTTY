@@ -104,9 +104,11 @@ def checkSessions(sessions):
 
     for item in sessions:
         if not sublimeAssert(
-            isinstance(item, dict) and
-            "name" in item and isinstance(item["name"], str),
-
+            all((
+                isinstance(item, dict),
+                "name" in item,
+                isinstance(item["name"], str)
+            )),
             MSG["invalid_sessions"]
         ):
             return False
@@ -116,11 +118,12 @@ def checkSessions(sessions):
                 return False
         else:
             if not sublimeAssert(
-                "host" in item and isinstance(item["host"], str) and re_match(IPV4_REGEX, item["host"]) is not None and
-                "port" in item and isinstance(item["port"], int) and item["port"] >= 0 and
-                ("login" not in item or isinstance(item["login"], str)) and
-                ("password" not in item or isinstance(item["password"], str)),
-
+                all((
+                    "host" in item, isinstance(item["host"], str), re_match(IPV4_REGEX, item["host"]) is not None,
+                    "port" in item, isinstance(item["port"], int), item["port"] >= 0,
+                    ("login" not in item or isinstance(item["login"], str)),
+                    ("password" not in item or isinstance(item["password"], str))
+                )),
                 MSG["invalid_sessions"]
             ):
                 return False
@@ -294,8 +297,8 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
                 [
                     "### Choose location{} ###".format((": " + "/".join(self.cur_location_path)) if self.cur_location_path else ""),
                     "<HERE>"
-                ] +
-                [self.cur_options[index]["name"] for index in self.cur_folder_indexes],
+                ]
+                + [self.cur_options[index]["name"] for index in self.cur_folder_indexes],
                 choose
             )
 
@@ -442,8 +445,8 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                 self.cur_options = selected["children"]
 
             self.window.show_quick_panel(
-                (["*** THIS FOLDER ***"] if self.cur_options != self.sessions else []) +
-                [("[{}]".format(item["name"]) if "children" in item else item["name"]) for item in self.cur_options],
+                (["*** THIS FOLDER ***"] if self.cur_options != self.sessions else [])
+                + [("[{}]".format(item["name"]) if "children" in item else item["name"]) for item in self.cur_options],
                 choose
             )
 
@@ -529,6 +532,6 @@ def plugin_unloaded():
     # Disable settings check after saving
     getSettings().clear_on_change("update_settings")
 
-    # Removing menu file
+    # Remove menu file
     if os.path.exists(MENU_PATH):
         os.remove(MENU_PATH)
