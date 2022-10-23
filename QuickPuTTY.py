@@ -36,7 +36,7 @@ def mkpath(*paths):
 
 
 USER_PACKAGE_PATH = mkpath(sublime.packages_path(), "User", PACKAGE_NAME)
-SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, f"{PACKAGE_NAME}.sublime-settings")
+SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, f"src/{PACKAGE_NAME}.sublime-settings")
 SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
