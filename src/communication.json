@@ -1,7 +1,3 @@
-//  Copyright (c) 2020-2022 Nikita Paniukhin  │
-//       Licensed under the MIT license       │
-// ───────────────────────────────────────────┘
-
 {
     "cancel": "{package_name}: Canceled",
 
@@ -25,7 +21,7 @@
     "setting_not_found": "Some settings keys were not found in QuickPuTTY.sublime-settings.\n\nReload QuickPuTTY or Sublime Text.\n\nIf you can not fix this error, reinstall QuickPuTTY.",
 
     "invalid_PuTTY_exec": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type str (string) or list[str].\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
-    "invalid_pure_PuTTY_enabled": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type bool (boolean: true/false).\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
+    "invalid_bare_PuTTY_enabled": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type bool (boolean: true/false).\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
 
     "assertion_failed": "{package_name}: Assertion failed"
 }

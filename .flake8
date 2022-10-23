@@ -11,4 +11,4 @@ require-plugins =
 
 max-line-length = 120
 import-order-style = pep8
-ignore = W503,D1,D400,PIE786,N802
+ignore = W503,D1,D400,PIE786

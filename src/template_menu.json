@@ -4,10 +4,10 @@
         "mnemonic": "u",
         "id": "putty",
 
-        "pure_PuTTY_enabled": [
+        "bare_PuTTY_enabled": [
             // Optionally, you can add an option to run PuTTY
             // without connecting to a specific server.
-            // Toggle the "pure_PuTTY_enabled" setting to achieve this.
+            // Toggle the "bare_PuTTY_enabled" setting to achieve this.
             {
                 "caption": "Open PuTTY",
                 "command": "quickputty_open",

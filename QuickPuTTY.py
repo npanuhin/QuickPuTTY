@@ -41,7 +41,7 @@ SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
 
-def sublimeAssert(expression, error_message=None):
+def sublime_assert(expression, error_message=None):
     """Replace Python's "assert" keyword"""
     if expression is False:
         sublime.error_message(MSG["assertion_failed"] if error_message is None else error_message)
@@ -49,7 +49,7 @@ def sublimeAssert(expression, error_message=None):
     return expression
 
 
-def sublimePrint(string, debug=True):
+def sublime_print(string, debug=True):
     if debug:
         print(string)
     sublime.status_message(string)
@@ -57,51 +57,51 @@ def sublimePrint(string, debug=True):
 
 # =============================================================================================================
 
-def getSettings():
+def get_settings():
     """Check whether the format of the settings is correct. Return settings object or None"""
     settings = sublime.load_settings(f"{PACKAGE_NAME}.sublime-settings")
 
     # Check if all settings exist
-    if not sublimeAssert(
-        all(settings.has(setting) for setting in ("PuTTY_exec", "pure_PuTTY_enabled")),
+    if not sublime_assert(
+        all(settings.has(setting) for setting in ("PuTTY_exec", "bare_PuTTY_enabled")),
         MSG["setting_not_found"]
     ):
         return None
 
     # Renewing handler
     settings.clear_on_change("update_settings")
-    settings.add_on_change("update_settings", reloadSettings)
+    settings.add_on_change("update_settings", reload_settings)
 
     # Checking "PuTTY_exec" setting
-    if not sublimeAssert(isinstance(settings.get("PuTTY_exec"), (str, list)), MSG["invalid_PuTTY_exec"]):
+    if not sublime_assert(isinstance(settings.get("PuTTY_exec"), (str, list)), MSG["invalid_PuTTY_exec"]):
         return None
 
-    if isinstance(settings.get("PuTTY_exec"), list) and not sublimeAssert(
+    if isinstance(settings.get("PuTTY_exec"), list) and not sublime_assert(
         all(isinstance(item, str) for item in settings.get("PuTTY_exec")),
         MSG["invalid_PuTTY_exec"]
     ):
         return None
 
-    # Checking "pure_PuTTY_enabled" setting
-    if not sublimeAssert(isinstance(settings.get("pure_PuTTY_enabled"), bool), MSG["invalid_pure_PuTTY_enabled"]):
+    # Checking "bare_PuTTY_enabled" setting
+    if not sublime_assert(isinstance(settings.get("bare_PuTTY_enabled"), bool), MSG["invalid_bare_PuTTY_enabled"]):
         return None
 
     # print("{}: Settings checked".format(PACKAGE_NAME))
     return settings
 
 
-def reloadSettings():
-    # getSettings()  # Currently not needed because there is the same check in reloadSessions
-    reloadSessions()
+def reload_settings():
+    # get_settings()  # Currently not needed because there is the same check in reload_sessions
+    reload_sessions()
 
 
-def checkSessions(sessions):
+def check_sessions(sessions):
     """Check whether the format of the sessions is correct (recursive). Return True/False"""
-    if not sublimeAssert(isinstance(sessions, list), MSG["invalid_sessions"]):
+    if not sublime_assert(isinstance(sessions, list), MSG["invalid_sessions"]):
         return False
 
     for item in sessions:
-        if not sublimeAssert(
+        if not sublime_assert(
             all((
                 isinstance(item, dict),
                 "name" in item,
@@ -112,10 +112,10 @@ def checkSessions(sessions):
             return False
 
         if "children" in item:
-            if not sublimeAssert(checkSessions(item["children"]), MSG["invalid_sessions"]):
+            if not sublime_assert(check_sessions(item["children"]), MSG["invalid_sessions"]):
                 return False
         else:
-            if not sublimeAssert(
+            if not sublime_assert(
                 all((
                     "host" in item, isinstance(item["host"], str), re_match(IPV4_REGEX, item["host"]) is not None,
                     "port" in item, isinstance(item["port"], int), item["port"] >= 0,
@@ -129,7 +129,7 @@ def checkSessions(sessions):
     return True
 
 
-def updateSesions(sessions):
+def update_sesions(sessions):
     """Store sessions to "sessions.json" and create a .sublime-menu file"""
 
     def build(item):
@@ -166,19 +166,19 @@ def updateSesions(sessions):
     data = deepcopy(TEMPLATE_MENU)
 
     # Structure: "Open PuTTY" command | "New", "Manage", "Remove", etc. options | Root folder
-    data[0]["children"] = (data[0]["pure_PuTTY_enabled"] if getSettings().get("pure_PuTTY_enabled") else []) + \
+    data[0]["children"] = (data[0]["bare_PuTTY_enabled"] if get_settings().get("bare_PuTTY_enabled") else []) + \
         data[0]["children"] + [build(item) for item in sessions]
 
     # Removing temporary storage
-    del data[0]["pure_PuTTY_enabled"]
+    del data[0]["bare_PuTTY_enabled"]
 
     with open(MENU_PATH, 'w', encoding="utf-8") as file:
         json_dump(data, file, ensure_ascii=False, indent=4, sort_keys=False)
 
-    sublimePrint(MSG["sessions_reloaded"])
+    sublime_print(MSG["sessions_reloaded"])
 
 
-def reloadSessions():
+def reload_sessions():
     # Renewing file for storing sessions
     sessions = None
     if os.path.isfile(SESSIONS_PATH):
@@ -193,17 +193,17 @@ def reloadSessions():
         sessions = []
 
     # Checking and updating sessios
-    if not checkSessions(sessions):
+    if not check_sessions(sessions):
         return
 
-    updateSesions(sessions)
+    update_sesions(sessions)
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
     """Responsible for opening PuTTY"""
 
     def run(self, host=None, port=22, login="", password=""):
-        run_command = getSettings().get("PuTTY_exec")
+        run_command = get_settings().get("PuTTY_exec")
 
         if host is not None:
             if isinstance(run_command, str):
@@ -233,33 +233,33 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         if self.sessions is None:
             self.sessions = []
 
-        if not checkSessions(self.sessions):
-            sublimePrint(MSG["canel"])
+        if not check_sessions(self.sessions):
+            sublime_print(MSG["canel"])
             return
 
         self.new_session = {}  # Creating storage for new session
 
-        self.window.show_quick_panel(("Session", "Folder"), self.chooseType)
+        self.window.show_quick_panel(("Session", "Folder"), self.choose_type)
 
-    def chooseType(self, index):
+    def choose_type(self, index):
         if index == -1:  # Nothing is selected
-            sublimePrint(MSG["cancel"])
+            sublime_print(MSG["cancel"])
             return
 
-        self.chooseLocation(self.window.show_input_panel, (
+        self.choose_location(self.window.show_input_panel, (
             "Folder name" if index else "Session name",
             "",
-            self.saveFolder if index else self.chooseHost,
+            self.save_folder if index else self.choose_host,
             0,
-            lambda: sublimePrint(MSG["cancel"])
+            lambda: sublime_print(MSG["cancel"])
         ))
 
-    def saveFolder(self, folder_name):
+    def save_folder(self, folder_name):
         if not folder_name.strip():
-            sublimePrint(MSG["cancel"])
+            sublime_print(MSG["cancel"])
             return
 
-        sublimePrint(MSG["folder_created"].format(
+        sublime_print(MSG["folder_created"].format(
             name=folder_name.strip(),
             location=(' in "' + "/".join(self.cur_location_path)) + '"' if self.cur_location_path else "")
         )
@@ -269,9 +269,9 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             "children": []
         })
 
-        updateSesions(self.sessions)
+        update_sesions(self.sessions)
 
-    def chooseLocation(self, callback, args):
+    def choose_location(self, callback, args):
         self.cur_options = self.sessions
         self.cur_location_path = []
 
@@ -279,7 +279,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         def choose(index):
             if index == -1:  # Nothing is selected
-                sublimePrint(MSG["cancel"])
+                sublime_print(MSG["cancel"])
                 return
 
             if index == 1:   # Click on "<HERE>"
@@ -305,9 +305,9 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         choose(0)
 
-    def chooseHost(self, session_name):
+    def choose_host(self, session_name):
         if not session_name.strip():
-            sublimePrint(MSG["cancel"])
+            sublime_print(MSG["cancel"])
             return
 
         if session_name in (item["name"] for item in self.cur_options):
@@ -316,12 +316,12 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         self.new_session["name"] = session_name
         self.window.show_input_panel(
-            "Server host", "127.0.0.1", self.choosePort, 0, lambda: sublimePrint(MSG["cancel"])
+            "Server host", "127.0.0.1", self.choose_port, 0, lambda: sublime_print(MSG["cancel"])
         )
 
-    def choosePort(self, session_host):
+    def choose_port(self, session_host):
         if not session_host.strip():
-            sublimePrint(MSG["cancel"])
+            sublime_print(MSG["cancel"])
             return
 
         # IPv4 is recognized:
@@ -330,9 +330,11 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             session_host = ".".join(ipv4_match.groups())
 
         self.new_session["host"] = session_host
-        self.window.show_input_panel("Connection port", "22", self.chooseLogin, 0, lambda: sublimePrint(MSG["cancel"]))
+        self.window.show_input_panel(
+            "Connection port", "22", self.choose_login, 0, lambda: sublime_print(MSG["cancel"])
+        )
 
-    def chooseLogin(self, session_port):
+    def choose_login(self, session_port):
         try:
             session_port = int(session_port)
             port_valid = (session_port >= 0)
@@ -340,36 +342,36 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         except Exception:
             port_valid = False
 
-        if not sublimeAssert(port_valid, MSG["wrong_port"]):
-            sublimePrint(MSG["cancel"])
+        if not sublime_assert(port_valid, MSG["wrong_port"]):
+            sublime_print(MSG["cancel"])
             return
 
         self.new_session["port"] = session_port
         self.window.show_input_panel(
-            "Username (optional)", "", self.choosePassword, 0, lambda: sublimePrint(MSG["cancel"])
+            "Username (optional)", "", self.choose_password, 0, lambda: sublime_print(MSG["cancel"])
         )
 
-    def choosePassword(self, session_login):
+    def choose_password(self, session_login):
         if session_login.strip():
             self.new_session["login"] = session_login.strip()
 
         self.window.show_input_panel(
-            "Password (optional)", "", self.saveSession, 0, lambda: sublimePrint(MSG["cancel"])
+            "Password (optional)", "", self.save_session, 0, lambda: sublime_print(MSG["cancel"])
         )
 
-    def saveSession(self, session_password):
+    def save_session(self, session_password):
         if session_password.strip():
             self.new_session["password"] = session_password.strip()
 
         self.cur_options.append(self.new_session)
 
-        sublimePrint(MSG["session_created"].format(
+        sublime_print(MSG["session_created"].format(
             name=self.new_session["name"],
             host=self.new_session["host"],
             location=(' in "' + "/".join(self.cur_location_path)) + '"' if self.cur_location_path else "")
         )
 
-        updateSesions(self.sessions)
+        update_sesions(self.sessions)
 
 
 class QuickputtyRemove(sublime_plugin.WindowCommand):
@@ -386,8 +388,8 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
         if self.sessions is None:
             self.sessions = []
 
-        if not checkSessions(self.sessions):
-            sublimePrint(MSG["canel"])
+        if not check_sessions(self.sessions):
+            sublime_print(MSG["canel"])
             return
 
         if not self.sessions:
@@ -403,7 +405,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
         def choose(index):
             if index == -1:
-                sublimePrint(MSG["cancel"])
+                sublime_print(MSG["cancel"])
                 return
 
             if index >= 0:
@@ -421,14 +423,14 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
                         del self.last_location[self.last_index - 1]
 
-                        sublimePrint(MSG["folder_removed"].format(
+                        sublime_print(MSG["folder_removed"].format(
                             name=item["name"],
                             subitems_count=len(item["children"]))  # TODO: subitem(s)
                         )
-                        updateSesions(self.sessions)
+                        update_sesions(self.sessions)
 
                     else:
-                        sublimePrint(MSG["cancel"])
+                        sublime_print(MSG["cancel"])
 
                     return
 
@@ -441,11 +443,11 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
                         del self.cur_options[index - 1]
 
-                        sublimePrint(MSG["session_removed"].format(name=selected["name"], host=selected["host"]))
-                        updateSesions(self.sessions)
+                        sublime_print(MSG["session_removed"].format(name=selected["name"], host=selected["host"]))
+                        update_sesions(self.sessions)
 
                     else:
-                        sublimePrint(MSG["cancel"])
+                        sublime_print(MSG["cancel"])
 
                     return
 
@@ -477,7 +479,7 @@ class Files(sublime_plugin.EventListener):
 
     def on_post_save_async(self, view):
         if mkpath(view.file_name()) == SESSIONS_PATH:
-            reloadSessions()
+            reload_sessions()
 
 
 class QuickputtyReadme(sublime_plugin.WindowCommand):
@@ -497,7 +499,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
         )
 
 
-def onLoad():
+def on_load():
     """Asynchronous initialization on startup"""
     global MSG
     global TEMPLATE_MENU
@@ -512,7 +514,7 @@ def onLoad():
 
     MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json"))
     TEMPLATE_MENU = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/template_menu.json"))
-    INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/installation.html")
+    INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/installation.html")
 
     for key, value in MSG.items():
         MSG[key] = re_sub(r"{([\w\d_]+)}", r"{{\1}}", value) \
@@ -528,22 +530,22 @@ def onLoad():
     # QuickputtyReadme(sublime.active_window()).run()  # For debug
 
     # Check settings
-    if getSettings() is None:
+    if get_settings() is None:
         return
 
     # Creating folder in "Packages/User"
     os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)
 
-    reloadSessions()
+    reload_sessions()
 
 
 def plugin_loaded():
-    sublime.set_timeout_async(onLoad)
+    sublime.set_timeout_async(on_load)
 
 
 def plugin_unloaded():
     # Disable settings check after saving
-    getSettings().clear_on_change("update_settings")
+    get_settings().clear_on_change("update_settings")
 
     # Remove menu file
     if os.path.exists(MENU_PATH):
