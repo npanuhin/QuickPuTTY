@@ -1,0 +1,13 @@
+-   repo: https://github.com/pycqa/flake8
+    rev: ''
+    hooks:
+    -   id: flake8
+        additional_dependencies:
+            - dlint
+            - pep8-naming
+            - flake8-pie
+            - flake8-builtins
+            - flake8-simplify
+            - flake8-docstrings
+            - flake8-import-order
+            - flake8-comprehensions

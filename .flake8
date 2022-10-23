@@ -1,12 +1,14 @@
 [flake8]
 require-plugins =
-    ; flake8-2020
-    flake8
+    dlint
+    pep8-naming
+    flake8-pie
     flake8-builtins
+    flake8-simplify
     flake8-docstrings
     flake8-import-order
-    ; flake8-typing-extensions
+    flake8-comprehensions
 
 max-line-length = 120
 import-order-style = pep8
-ignore = W503,D1,D400
+ignore = W503,D1,D400,PIE786,N802

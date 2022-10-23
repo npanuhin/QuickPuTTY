@@ -75,12 +75,11 @@ def getSettings():
     if not sublimeAssert(isinstance(settings.get("PuTTY_exec"), (str, list)), MSG["invalid_PuTTY_exec"]):
         return None
 
-    if isinstance(settings.get("PuTTY_exec"), list):
-        if not sublimeAssert(
-            all(isinstance(item, str) for item in settings.get("PuTTY_exec")),
-            MSG["invalid_PuTTY_exec"]
-        ):
-            return None
+    if isinstance(settings.get("PuTTY_exec"), list) and not sublimeAssert(
+        all(isinstance(item, str) for item in settings.get("PuTTY_exec")),
+        MSG["invalid_PuTTY_exec"]
+    ):
+        return None
 
     # Checking "pure_PuTTY_enabled" setting
     if not sublimeAssert(isinstance(settings.get("pure_PuTTY_enabled"), bool), MSG["invalid_pure_PuTTY_enabled"]):
