@@ -1,6 +1,7 @@
-#  Copyright (c) 2020-2022 Nikita Paniukhin  │
-#       Licensed under the MIT license       │
-# ───────────────────────────────────────────┘
+# ┌───────────────────────────────────────────┐
+# │ Copyright (c) 2020-2022 Nikita Paniukhin  │
+# │      Licensed under the MIT license       │
+# └───────────────────────────────────────────┘
 
 from re import match as re_match, sub as re_sub
 from json import dump as json_dump
@@ -13,7 +14,7 @@ import sublime_plugin
 import sublime
 
 
-# ================================================ USER PART =================================================
+# ==================================================== USER PART =======================================================
 
 PACKAGE_NAME = "QuickPuTTY"
 
@@ -22,7 +23,7 @@ EDIT_DEFAULT_SETTINGS = True
 
 # TODO: Preventing the user from changing the default settings (in .sublime-package file)
 
-# =============================================================================================================
+# ======================================================================================================================
 
 
 # IPV4_REGEX is used to prettify IP addresses, optional enhancement
@@ -409,11 +410,11 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                 if self.cur_options == self.sessions:
                     index += 1
 
-                if index == 0:  # Click on "*** THIS FOLDER ***"
+                if index == 0:  # Click on "*** REMOVE THIS FOLDER ***"
                     item = self.last_location[self.last_index - 1]
 
                     if sublime.yes_no_cancel_dialog(
-                        "Folder \"{}\" ({} subitems) will be deleted. Are you sure?".format(
+                        "Folder \"{}\" ({} subitems) will be deleted. Are you sure?".format(  # TODO: subitem(s)
                             item["name"], len(item["children"])
                         )
                     ) == sublime.DIALOG_YES:
@@ -422,7 +423,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
                         sublimePrint(MSG["folder_removed"].format(
                             name=item["name"],
-                            subitems_count=len(item["children"]))
+                            subitems_count=len(item["children"]))  # TODO: subitem(s)
                         )
                         updateSesions(self.sessions)
 
@@ -457,7 +458,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                 self.cur_options = selected["children"]
 
             self.window.show_quick_panel(
-                (["*** THIS FOLDER ***"] if self.cur_options != self.sessions else [])
+                (["*** REMOVE THIS FOLDER ***"] if self.cur_options != self.sessions else [])
                 + [("[{}]".format(item["name"]) if "children" in item else item["name"]) for item in self.cur_options],
                 choose
             )
@@ -504,13 +505,13 @@ def onLoad():
 
     while True:
         try:
-            sublime.load_resource(f"Packages/{PACKAGE_NAME}/communication.json")
+            sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json")
             break
         except FileNotFoundError:
             sleep(0.1)
 
-    MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/communication.json"))
-    TEMPLATE_MENU = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/template_menu.json"))
+    MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json"))
+    TEMPLATE_MENU = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/template_menu.json"))
     INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/installation.html")
 
     for key, value in MSG.items():

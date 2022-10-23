@@ -1,9 +1,6 @@
 name: Lint code with flake8
 
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   flake8-linter:
@@ -26,6 +23,4 @@ jobs:
           pip install -r src/requirements.txt
 
       - name: Lint with flake8
-        run: |
-          pip install flake8
-          flake8 --show-source --statistics
+        run: flake8 --show-source --statistics

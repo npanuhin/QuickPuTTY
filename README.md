@@ -25,12 +25,12 @@ Check out how quickly you can start an SSH session **without entering username a
 
 ![](./media/usage.gif)
 
-<h2>Installation</h2>
+## Installation
 
 Plugin is available on [Package Control](https://packagecontrol.io/packages/QuickPuTTY "Visit QuickPuTTY page on packagecontrol.io") and can be installed as follows:
 
-1.  Press <kbd>Ctrl + Shift + P</kbd>, then enter `Package Control: Install Package`
-2.  Choose `QuickPuTTY` in the list of available packages
+1. Press <kbd>Ctrl + Shift + P</kbd>, then enter `Package Control: Install Package`
+2. Choose `QuickPuTTY` in the list of available packages
 
 After installation, you can find settings and README by going to `Preferences > Package Settings > QuickPuTTY` in nav-bar.
 
@@ -40,26 +40,26 @@ After installation, you can find settings and README by going to `Preferences > 
 
 #### Create folder
 
-1.  Go to `PuTTY > New session/folder` in the nav-bar and select `Folder` option
-2.  [Choose location](#choosing-location) to place new folder
-3.  Enter folder name
+1. Go to `PuTTY > New session/folder` in the nav-bar and select `Folder` option
+2. [Choose location](#choosing-location) to place new folder
+3. Enter folder name
 
 #### Create session
 
-1.  Go to `PuTTY > New session/folder` in the nav-bar and select `Session` option
-2.  [Choose location](#choosing-location) to place new session
-3.  Enter *server host/ip*, *port*, *username* and *password* (last two are optional)
+1. Go to `PuTTY > New session/folder` in the nav-bar and select `Session` option
+2. [Choose location](#choosing-location) to place new session
+3. Enter *server host/ip*, *port*, *username* and *password* (last two are optional)
 
 #### Edit sessions and folders
 
-1.  Go to `PuTTY > Manage sessions` in the nav-bar
-2.  Edit data
-3.  Do not forget to save the file
+1. Go to `PuTTY > Manage sessions` in the nav-bar
+2. Edit data
+3. Do not forget to save the file
 
 #### Remove session/folder
 
-1.  Go to `PuTTY > Remove session/folder` in the nav-bar
-2.  Select a session or folder you want to remove using the [*Choose location*](#choosing-location) system
+1. Go to `PuTTY > Remove session/folder` in the nav-bar
+2. Select a session or folder you want to remove using the [*Choose location*](#choosing-location) system
 
 ### Choosing location
 
@@ -69,15 +69,32 @@ At each stage, you'll see a list of options:
 |:-----------------------:|:-------------------------------------------------------------------:|
 | ### Choose location ### |                          Just a title                               |
 |         \<HERE\>        | Select this if you want to place session/folder in current location |
-|        {folder_1}       |            Select a folder name to navigate into it                 |
-|          . . .          |                             . . .                                   |
+|        {folder_№}       |            Select a folder name to navigate into it                 |
 
 -------------------------------------------
 
-The plugin was tested on `Windows 10 (21H1) x64` and `Ubuntu 18.04.03`.
+The plugin was tested on `Windows 10 (21H2) x64` and `Ubuntu 18.04.03`.
 If you have found a bug, mistake, or a typo, you are very welcome to contact me (e.g. on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me")) or open a [new GitHub issue](https://github.com/npanuhin/QuickPuTTY/issues/new "Create a new GitHub issue in the QuickPuTTY repository").
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
+
+-------------------------------------------
+
+## Development
+
+#### Python modules
+```console
+pip install -r src/requirements.txt
+```
+
+#### Code linting
+```console
+flake8 --show-source --statistics
+
+# Pre-commit hook:
+pip install pre-commit
+pre-commit install
+```
 
 -------------------------------------------
 
