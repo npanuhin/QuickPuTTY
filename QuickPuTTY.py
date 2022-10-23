@@ -30,7 +30,7 @@ IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::
 
 
 def mkpath(*paths):
-    '''Combines paths and normalizes the result'''
+    """Combine paths and normalize the result"""
     return os.path.normpath(os.path.join(*paths))
 
 
@@ -41,7 +41,7 @@ MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
 
 def sublimeAssert(expression, error_message=None):
-    '''Replacement for Python's "assert" keyword'''
+    """Replace Python's "assert" keyword"""
     if expression is False:
         sublime.error_message(MSG["assertion_failed"] if error_message is None else error_message)
 
@@ -57,8 +57,7 @@ def sublimePrint(string, debug=True):
 # =============================================================================================================
 
 def getSettings():
-    '''Checks whether the format of the settings is correct. Returns settings object or None'''
-
+    """Check whether the format of the settings is correct. Return settings object or None"""
     settings = sublime.load_settings(f"{PACKAGE_NAME}.sublime-settings")
 
     # Check if all settings exist
@@ -97,8 +96,7 @@ def reloadSettings():
 
 
 def checkSessions(sessions):
-    '''Checks whether the format of the sessions is correct. Recursive. Returns True/False'''
-
+    """Check whether the format of the sessions is correct (recursive). Return True/False"""
     if not sublimeAssert(isinstance(sessions, list), MSG["invalid_sessions"]):
         return False
 
@@ -132,7 +130,7 @@ def checkSessions(sessions):
 
 
 def updateSesions(sessions):
-    '''Stores sessions to "sessions.json" and creates a .sublime-menu file'''
+    """Store sessions to "sessions.json" and create a .sublime-menu file"""
 
     def build(item):
         result = {
@@ -202,7 +200,7 @@ def reloadSessions():
 
 
 class QuickputtyOpen(sublime_plugin.WindowCommand):
-    '''Responsible for opening PuTTY'''
+    """Responsible for opening PuTTY"""
 
     def run(self, host=None, port=22, login="", password=""):
         run_command = getSettings().get("PuTTY_exec")
@@ -222,7 +220,7 @@ class QuickputtyOpen(sublime_plugin.WindowCommand):
 
 
 class QuickputtyNew(sublime_plugin.WindowCommand):
-    '''Responsible for creating new sessions and folders'''
+    """Responsible for creating new sessions and folders"""
 
     def run(self):
         with open(SESSIONS_PATH, encoding="utf-8") as file:
@@ -375,7 +373,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
 
 class QuickputtyRemove(sublime_plugin.WindowCommand):
-    '''Responsible for removing sessions and folders'''
+    """Responsible for removing sessions and folders"""
 
     def run(self):
         with open(SESSIONS_PATH, encoding="utf-8") as file:
@@ -469,12 +467,11 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
 
 class Files(sublime_plugin.EventListener):
-    '''Controls the behavior of settings file and sessions file and updates the .sublime-menu file'''
+    """Controls the behavior of settings file and sessions file and updates the .sublime-menu file"""
 
     # Does not work in sublime-package file. Help wanted. TODO
     def on_load_async(self, view):
-        '''Preventing the user from changing the default settings'''
-
+        """Prevent the user from changing the default settings"""
         if not EDIT_DEFAULT_SETTINGS and mkpath(view.file_name()) == SETTINGS_PATH:
             view.set_read_only(True)
 
@@ -484,7 +481,7 @@ class Files(sublime_plugin.EventListener):
 
 
 class QuickputtyReadme(sublime_plugin.WindowCommand):
-    '''Responsible for showing the README file when installing the package'''
+    """Responsible for showing the README file when installing the package"""
 
     def run(self):
         view = sublime.active_window().new_file()
@@ -501,8 +498,7 @@ class QuickputtyReadme(sublime_plugin.WindowCommand):
 
 
 def onLoad():
-    '''This function should run asynchronously on plugin startup'''
-
+    """Asynchronous initialization on startup"""
     global MSG
     global TEMPLATE_MENU
     global INSTALL_HTML
