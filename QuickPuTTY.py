@@ -2,15 +2,15 @@
 #       Licensed under the MIT license       │
 # ───────────────────────────────────────────┘
 
-import sublime_plugin
-import sublime
-
-from json import dump as json_dump
 from re import match as re_match, sub as re_sub
+from json import dump as json_dump
 from subprocess import Popen
 from copy import deepcopy
 from time import sleep
 import os
+
+import sublime_plugin
+import sublime
 
 
 # ================================================ USER PART =================================================
@@ -168,7 +168,8 @@ def updateSesions(sessions):
     data = deepcopy(TEMPLATE_MENU)
 
     # Structure: "Open PuTTY" command | "New", "Manage", "Remove", etc. options | Root folder
-    data[0]["children"] = (data[0]["pure_PuTTY_enabled"] if getSettings().get("pure_PuTTY_enabled") else []) + data[0]["children"] + [build(item) for item in sessions]
+    data[0]["children"] = (data[0]["pure_PuTTY_enabled"] if getSettings().get("pure_PuTTY_enabled") else []) + \
+        data[0]["children"] + [build(item) for item in sessions]
 
     # Removing temporary storage
     del data[0]["pure_PuTTY_enabled"]
@@ -295,7 +296,9 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
             self.window.show_quick_panel(
                 [
-                    "### Choose location{} ###".format((": " + "/".join(self.cur_location_path)) if self.cur_location_path else ""),
+                    "### Choose location{} ###".format(
+                        (": " + "/".join(self.cur_location_path)) if self.cur_location_path else ""
+                    ),
                     "<HERE>"
                 ]
                 + [self.cur_options[index]["name"] for index in self.cur_folder_indexes],
@@ -314,7 +317,9 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             return
 
         self.new_session["name"] = session_name
-        self.window.show_input_panel("Server host", "127.0.0.1", self.choosePort, 0, lambda: sublimePrint(MSG["cancel"]))
+        self.window.show_input_panel(
+            "Server host", "127.0.0.1", self.choosePort, 0, lambda: sublimePrint(MSG["cancel"])
+        )
 
     def choosePort(self, session_host):
         if not session_host.strip():
@@ -342,13 +347,17 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             return
 
         self.new_session["port"] = session_port
-        self.window.show_input_panel("Username (optional)", "", self.choosePassword, 0, lambda: sublimePrint(MSG["cancel"]))
+        self.window.show_input_panel(
+            "Username (optional)", "", self.choosePassword, 0, lambda: sublimePrint(MSG["cancel"])
+        )
 
     def choosePassword(self, session_login):
         if session_login.strip():
             self.new_session["login"] = session_login.strip()
 
-        self.window.show_input_panel("Password (optional)", "", self.saveSession, 0, lambda: sublimePrint(MSG["cancel"]))
+        self.window.show_input_panel(
+            "Password (optional)", "", self.saveSession, 0, lambda: sublimePrint(MSG["cancel"])
+        )
 
     def saveSession(self, session_password):
         if session_password.strip():
@@ -387,7 +396,8 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             sublime.message_dialog(MSG["nothing_to_remove"])
             return
 
-        self.last_location = None         # DEV: last_location = previous list[items{}] = list[items{one of which is item{"children"=`self.cur_options`}}]
+        # DEV: last_location = previous list[items{}] = list[items{one of which is item{"children"=`self.cur_options`}}]
+        self.last_location = None
         self.last_index = -1
 
         self.cur_options = self.sessions  # DEV: cur_options   = list[items{}]
@@ -406,12 +416,17 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                     item = self.last_location[self.last_index - 1]
 
                     if sublime.yes_no_cancel_dialog(
-                        "Folder \"{}\" ({} subitems) will be deleted. Are you sure?".format(item["name"], len(item["children"]))
+                        "Folder \"{}\" ({} subitems) will be deleted. Are you sure?".format(
+                            item["name"], len(item["children"])
+                        )
                     ) == sublime.DIALOG_YES:
 
                         del self.last_location[self.last_index - 1]
 
-                        sublimePrint(MSG["folder_removed"].format(name=item["name"], subitems_count=len(item["children"])))
+                        sublimePrint(MSG["folder_removed"].format(
+                            name=item["name"],
+                            subitems_count=len(item["children"]))
+                        )
                         updateSesions(self.sessions)
 
                     else:
@@ -504,7 +519,9 @@ def onLoad():
     INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/installation.html")
 
     for key, value in MSG.items():
-        MSG[key] = re_sub(r"{([\w\d_]+)}", r"{{\1}}", value).replace(r"{{package_name}}", r"{package_name}").format(package_name=PACKAGE_NAME)
+        MSG[key] = re_sub(r"{([\w\d_]+)}", r"{{\1}}", value) \
+            .replace(r"{{package_name}}", r"{package_name}") \
+            .format(package_name=PACKAGE_NAME)
 
     # Show README
     try:

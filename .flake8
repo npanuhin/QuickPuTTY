@@ -1,0 +1,12 @@
+[flake8]
+require-plugins =
+    ; flake8-2020
+    flake8
+    flake8-builtins
+    flake8-docstrings
+    flake8-import-order
+    ; flake8-typing-extensions
+
+max-line-length = 120
+import-order-style = pep8
+ignore = W503,D1,D400
