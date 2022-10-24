@@ -11,4 +11,8 @@ require-plugins =
 
 max-line-length = 120
 import-order-style = pep8
-ignore = W503,D1,D400,PIE786
+ignore =
+    W503   ; Line break before binary operator (awaiting fix)
+    D1     ; Missing docstring
+    D400   ; First line should end with a period (comments)
+    PIE786 ; Use precise exception handlers

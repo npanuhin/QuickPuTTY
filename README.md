@@ -84,7 +84,7 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 
 #### Python modules
 ```console
-pip install -r src/requirements.txt
+pip install -U -r src/requirements.txt
 ```
 
 #### Code linting
@@ -92,7 +92,7 @@ pip install -r src/requirements.txt
 flake8 --show-source --statistics
 
 # Pre-commit hook:
-pip install pre-commit
+pip install -U pre-commit
 pre-commit install
 ```
 
