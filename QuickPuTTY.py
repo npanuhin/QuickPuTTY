@@ -3,10 +3,10 @@
 # │      Licensed under the MIT license       │
 # └───────────────────────────────────────────┘
 
-from re import match as re_match, sub as re_sub
 from typing import Callable, Union, List
 from json import dump as json_dump
 from dataclasses import dataclass
+from re import match as re_match
 from subprocess import Popen
 from copy import deepcopy
 from time import sleep
@@ -17,8 +17,6 @@ import sublime
 
 
 PACKAGE_NAME = "QuickPuTTY"
-
-DEBUG_MODE = False
 
 # If you want to edit default settings:  (!!! Does not work in sublime-package file. Help wanted !!!)
 # TODO: Preventing the user from changing the default settings (in .sublime-package file)
@@ -50,9 +48,8 @@ def sublime_assert(expression: bool, error_message=None) -> bool:
 
 
 def sublime_print(message: str) -> None:
-    if DEBUG_MODE:
-        print(message)
     sublime.status_message(message)
+    print(message)
 
 
 def sublime_cancel() -> None:
@@ -60,14 +57,15 @@ def sublime_cancel() -> None:
 
 
 @dataclass
-class Session():
+class Session:
     name: str
     host: str
     port: int
     login: str
     password: str
 
-# =============================================================================================================
+
+# ======================================================================================================================
 
 
 def get_settings() -> dict:
@@ -102,7 +100,7 @@ def get_settings() -> dict:
     ):
         return None
 
-    # print("{}: Settings checked".format(PACKAGE_NAME))
+    # print(f"{PACKAGE_NAME}: Settings checked")
     return settings
 
 
@@ -156,8 +154,7 @@ def update_sesions(sessions: List[Session]) -> None:
 
         if "children" in item:
             # Folder
-            result["children"] = [build(subitem) for subitem in item["children"]]
-
+            result["children"] = [build(child) for child in item["children"]]
         else:
             # Session
             result["command"] = "quickputty_open"
@@ -438,16 +435,15 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                     item = self.last_location[self.last_index - 1]
 
                     if sublime.yes_no_cancel_dialog(
-                        "Folder \"{}\" ({} subitems) will be deleted. Are you sure?".format(  # TODO: subitem(s)
-                            item["name"], len(item["children"])
+                        MSG["confirm_delete_folder"].format(
+                            name=item["name"], children_count=len(item["children"])
                         )
                     ) == sublime.DIALOG_YES:
 
                         del self.last_location[self.last_index - 1]
 
                         sublime_print(MSG["folder_removed"].format(
-                            name=item["name"],
-                            subitems_count=len(item["children"]))  # TODO: subitem(s)
+                            name=item["name"], children_count=len(item["children"]))
                         )
                         update_sesions(self.sessions)
 
@@ -460,7 +456,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
                 if "children" not in selected:  # If a session is selected
                     if sublime.yes_no_cancel_dialog(
-                        "Session \"{}\" ({}) will be deleted. Are you sure?".format(selected["name"], selected["host"])
+                        MSG["confirm_delete_session"].format(name=selected["name"], host=selected["host"])
                     ) == sublime.DIALOG_YES:
 
                         del self.cur_options[index - 1]
@@ -470,7 +466,6 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
                     else:
                         sublime_cancel()
-
                     return
 
                 # Else: a folder is selected
@@ -537,11 +532,6 @@ def on_load():
     MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json"))
     TEMPLATE_MENU = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/template_menu.json"))
     INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/installation.html")
-
-    for key, value in MSG.items():
-        MSG[key] = re_sub(r"{([\w\d_]+)}", r"{{\1}}", value) \
-            .replace(r"{{package_name}}", r"{package_name}") \
-            .format(package_name=PACKAGE_NAME)
 
     # Show README
     try:

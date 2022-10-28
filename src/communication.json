@@ -1,13 +1,16 @@
 {
-    "cancel": "{package_name}: Canceled",
+    "cancel": "QuickPuTTY: Canceled",
 
-    "sessions_reloaded": "{package_name}: Sessions reloaded",
+    "sessions_reloaded": "QuickPuTTY: Sessions reloaded",
 
-    "session_created": "{package_name}: Session \"{name}\" ({host}){location} was created",
-    "folder_created": "{package_name}: Folder \"{name}\"{location} was created",
+    "session_created": "QuickPuTTY: Session \"{name}\" ({host}){location} was created",
+    "folder_created": "QuickPuTTY: Folder \"{name}\"{location} was created",
 
-    "session_removed": "{package_name}: Session \"{name}\" ({host}) was removed",
-    "folder_removed": "{package_name}: Folder \"{name}\" ({subitems_count} subitems) was removed",
+    "confirm_delete_folder": "Folder \"{name}\" ({children_count} subitems) will be deleted. Are you sure?",
+    "confirm_delete_session": "Session \"{name}\" ({host}) will be deleted. Are you sure?",
+
+    "session_removed": "QuickPuTTY: Session \"{name}\" ({host}) was removed",
+    "folder_removed": "QuickPuTTY: Folder \"{name}\" ({children_count} subitems) was removed",
 
     "session_already_exists": "A session with that name already exists. Please choose a different name.",
     "wrong_port": "Server port must be a non-negative integer",
@@ -23,5 +26,5 @@
     "invalid_PuTTY_exec": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type str (string) or list[str].\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
     "invalid_PuTTY_launch_button": "\"PuTTY_exec\" setting has an incorrect value. Please check that the value is of type bool (boolean: true/false).\n\nYou may want to consider restarting QuickPuTTY or Sublime Text after fixing this error.",
 
-    "assertion_failed": "{package_name}: Assertion failed"
+    "assertion_failed": "QuickPuTTY: Assertion failed"
 }
