@@ -3,7 +3,7 @@
 # │      Licensed under the MIT license       │
 # └───────────────────────────────────────────┘
 
-from typing import Callable, Union, List
+from typing import Callable, Union, List, Dict, Optional
 from json import dump as json_dump
 from dataclasses import dataclass
 from re import match as re_match
@@ -20,7 +20,7 @@ PACKAGE_NAME = "QuickPuTTY"
 
 # If you want to edit default settings:  (!!! Does not work in sublime-package file. Help wanted !!!)
 # TODO: Preventing the user from changing the default settings (in .sublime-package file)
-EDIT_DEFAULT_SETTINGS = True
+EDIT_DEFAULT_SETTINGS = False
 
 # IPV4_REGEX is used to prettify IP addresses, optional enhancement
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
@@ -38,6 +38,10 @@ USER_PACKAGE_PATH = mkpath(sublime.packages_path(), "User", PACKAGE_NAME)
 SETTINGS_PATH = mkpath(sublime.packages_path(), PACKAGE_NAME, f"src/{PACKAGE_NAME}.sublime-settings")
 SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
+
+MSG: Dict[str, str] = None
+TEMPLATE_MENU: str = None
+INSTALL_HTML: str = None
 
 
 def sublime_assert(expression: bool, error_message=None) -> bool:
@@ -68,8 +72,8 @@ class Session:
 # ======================================================================================================================
 
 
-def get_settings() -> dict:
-    """Check whether the format of the settings is correct. Return settings object or None"""
+def get_settings() -> Optional[dict]:
+    """Check whether the format of the settings is correct. Returns settings object or None"""
     settings = sublime.load_settings(f"{PACKAGE_NAME}.sublime-settings")
 
     # Check if all settings exist
@@ -110,7 +114,7 @@ def reload_settings() -> None:
 
 
 def check_sessions(sessions: List[Session]) -> bool:
-    """Check whether the format of the sessions is correct (recursive). Return True/False"""
+    """Check whether the format of the sessions is correct (recursive). Returns True/False"""
     if not sublime_assert(isinstance(sessions, list), MSG["invalid_sessions"]):
         return False
 
@@ -139,7 +143,6 @@ def check_sessions(sessions: List[Session]) -> bool:
                 MSG["invalid_sessions"]
             ):
                 return False
-
     return True
 
 
@@ -273,8 +276,8 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         sublime_print(MSG["folder_created"].format(
             name=folder_name.strip(),
-            location=(' in "' + "/".join(self.cur_location_path)) + '"' if self.cur_location_path else "")
-        )
+            location=f" in \"{'/'.join(self.cur_location_path)}\"" if self.cur_location_path else ""
+        ))
 
         self.cur_options.append({
             "name": folder_name.strip(),
@@ -307,7 +310,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             self.window.show_quick_panel(
                 [
                     "### Choose location{} ###".format(
-                        (": " + "/".join(self.cur_location_path)) if self.cur_location_path else ""
+                        f": {'/'.join(self.cur_location_path)}" if self.cur_location_path else ""
                     ),
                     "<HERE>"
                 ]
@@ -346,7 +349,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         # IPv4 is recognized:
         ipv4_match = re_match(IPV4_REGEX, session_host)
         if ipv4_match is not None:
-            session_host = ".".join(ipv4_match.groups())
+            session_host = '.'.join(ipv4_match.groups())
 
         self.new_session["host"] = session_host
         self.window.show_input_panel(
@@ -387,8 +390,8 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         sublime_print(MSG["session_created"].format(
             name=self.new_session["name"],
             host=self.new_session["host"],
-            location=(' in "' + "/".join(self.cur_location_path)) + '"' if self.cur_location_path else "")
-        )
+            location=f" in \"{'/'.join(self.cur_location_path)}\"" if self.cur_location_path else ""
+        ))
 
         update_sesions(self.sessions)
 
@@ -522,32 +525,27 @@ def on_load():
     global TEMPLATE_MENU
     global INSTALL_HTML
 
-    while True:
+    while True:  # We don't know when assets are loaded
         try:
-            sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json")
+            MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json"))
+            TEMPLATE_MENU = sublime.decode_value(
+                sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/template_menu.json")
+            )
+            INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/installation.html")
             break
         except FileNotFoundError:
             sleep(0.1)
 
-    MSG = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/communication.json"))
-    TEMPLATE_MENU = sublime.decode_value(sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/template_menu.json"))
-    INSTALL_HTML = sublime.load_resource(f"Packages/{PACKAGE_NAME}/src/installation.html")
-
-    # Show README
-    try:
+    try:  # Show README if session file is absent (= package was just installed)
+        # This is because https://packagecontrol.io/docs/events is not working
         sublime.load_resource(f"Packages/User/{PACKAGE_NAME}/sessions.json")
     except FileNotFoundError:
         QuickputtyReadme(sublime.active_window()).run()
 
-    # QuickputtyReadme(sublime.active_window()).run()  # For debug
-
-    # Check settings
     if get_settings() is None:
         return
 
-    # Creating folder in "Packages/User"
-    os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)
-
+    os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)  # Create folder in "Packages/User"
     reload_sessions()
 
 
@@ -556,9 +554,7 @@ def plugin_loaded():
 
 
 def plugin_unloaded():
-    # Disable settings check after saving
-    get_settings().clear_on_change("update_settings")
+    get_settings().clear_on_change("update_settings")  # Disable `settings check on save`
 
-    # Remove menu file
-    if os.path.exists(MENU_PATH):
+    if os.path.exists(MENU_PATH):  # Remove active menu file
         os.remove(MENU_PATH)
