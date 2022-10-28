@@ -3,5 +3,5 @@
 	"PuTTY_exec": "putty",
 
 	// Enable the "Open PuTTY" option (just open the app without any session) in the nav-bar
-	"bare_PuTTY_enabled": true
+	"PuTTY_launch_button": true
 }

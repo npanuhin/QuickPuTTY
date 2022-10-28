@@ -74,7 +74,7 @@ At each stage, you'll see a list of options:
 -------------------------------------------
 
 This plugin was tested in `Sublime Text 4126` on `Windows 10 (21H2) x64` and `Ubuntu 18.04.03`.
-If you find a bug, mistake, or typo, you are very welcome to contact me (e.g., on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me")) or open a [new GitHub issue](https://github.com/npanuhin/QuickPuTTY/issues/new "Create a new GitHub issue in the QuickPuTTY repository").
+If you find a bug, mistake, or typo, you are very welcome to open a [new GitHub issue](https://github.com/npanuhin/QuickPuTTY/issues/new "Create a new GitHub Issue in the QuickPuTTY repository") or contact me directly (e.g., on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me")).
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
 

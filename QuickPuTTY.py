@@ -14,20 +14,19 @@ import sublime_plugin
 import sublime
 
 
-# ==================================================== USER PART =======================================================
-
 PACKAGE_NAME = "QuickPuTTY"
 
+DEBUG_MODE = False
+
 # If you want to edit default settings:  (!!! Does not work in sublime-package file. Help wanted !!!)
-EDIT_DEFAULT_SETTINGS = True
-
 # TODO: Preventing the user from changing the default settings (in .sublime-package file)
-
-# ======================================================================================================================
-
+EDIT_DEFAULT_SETTINGS = True
 
 # IPV4_REGEX is used to prettify IP addresses, optional enhancement
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
+
+SSH_HOST = "127.0.0.1"
+SSH_PORT = 22
 
 
 def mkpath(*paths):
@@ -44,13 +43,12 @@ MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 def sublime_assert(expression, error_message=None):
     """Replace Python's "assert" keyword"""
     if expression is False:
-        sublime.error_message(MSG["assertion_failed"] if error_message is None else error_message)
-
+        sublime.error_message(error_message or MSG["assertion_failed"])
     return expression
 
 
-def sublime_print(string, debug=True):
-    if debug:
+def sublime_print(string):
+    if DEBUG_MODE:
         print(string)
     sublime.status_message(string)
 
@@ -63,7 +61,7 @@ def get_settings():
 
     # Check if all settings exist
     if not sublime_assert(
-        all(settings.has(setting) for setting in ("PuTTY_exec", "bare_PuTTY_enabled")),
+        all(settings.has(setting) for setting in ("PuTTY_exec", "PuTTY_launch_button")),
         MSG["setting_not_found"]
     ):
         return None
@@ -82,8 +80,11 @@ def get_settings():
     ):
         return None
 
-    # Checking "bare_PuTTY_enabled" setting
-    if not sublime_assert(isinstance(settings.get("bare_PuTTY_enabled"), bool), MSG["invalid_bare_PuTTY_enabled"]):
+    # Checking "PuTTY_launch_button" setting
+    if not sublime_assert(
+        isinstance(settings.get("PuTTY_launch_button"), bool),
+        MSG["invalid_PuTTY_launch_button"]
+    ):
         return None
 
     # print("{}: Settings checked".format(PACKAGE_NAME))
@@ -165,12 +166,14 @@ def update_sesions(sessions):
     # Creating a .sublime-menu file
     data = deepcopy(TEMPLATE_MENU)
 
-    # Structure: "Open PuTTY" command | "New", "Manage", "Remove", etc. options | Root folder
-    data[0]["children"] = (data[0]["bare_PuTTY_enabled"] if get_settings().get("bare_PuTTY_enabled") else []) + \
-        data[0]["children"] + [build(item) for item in sessions]
+    # Structure: "Open PuTTY" command | "New", "Manage", "Remove", etc. options | Root folders
+    if get_settings().get("PuTTY_launch_button"):
+        data[0]["children"] = data[0]["PuTTY_launch_button"] + data[0]["children"]
+
+    data[0]["children"] += [build(item) for item in sessions]
 
     # Removing temporary storage
-    del data[0]["bare_PuTTY_enabled"]
+    del data[0]["PuTTY_launch_button"]
 
     with open(MENU_PATH, 'w', encoding="utf-8") as file:
         json_dump(data, file, ensure_ascii=False, indent=4, sort_keys=False)
@@ -179,7 +182,7 @@ def update_sesions(sessions):
 
 
 def reload_sessions():
-    # Renewing file for storing sessions
+    # Renewing sessions storage file
     sessions = None
     if os.path.isfile(SESSIONS_PATH):
         with open(SESSIONS_PATH, encoding="utf-8") as file:
@@ -282,11 +285,11 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
                 sublime_print(MSG["cancel"])
                 return
 
-            if index == 1:   # Click on "<HERE>"
+            if index == 1:  # Click on "<HERE>"
                 callback(*args)
                 return
 
-            if index != 0:   # Click NOT on the title (index = 0)
+            if index != 0:  # Click NOT on the title (index = 0)
                 self.cur_location_path.append(self.cur_options[self.cur_folder_indexes[index - 2]]["name"])
                 self.cur_options = self.cur_options[self.cur_folder_indexes[index - 2]]["children"]
 
@@ -313,10 +316,17 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
         if session_name in (item["name"] for item in self.cur_options):
             sublime.error_message(MSG["session_already_exists"])
             return
+            # self.choose_location(self.window.show_input_panel, (
+            #     "Folder name" if index else "Session name",
+            #     "",
+            #     self.save_folder if index else self.choose_host,
+            #     0,
+            #     lambda: sublime_print(MSG["cancel"])
+            # ))
 
         self.new_session["name"] = session_name
         self.window.show_input_panel(
-            "Server host", "127.0.0.1", self.choose_port, 0, lambda: sublime_print(MSG["cancel"])
+            "Server host", SSH_HOST, self.choose_port, 0, lambda: sublime_print(MSG["cancel"])
         )
 
     def choose_port(self, session_host):
@@ -331,7 +341,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         self.new_session["host"] = session_host
         self.window.show_input_panel(
-            "Connection port", "22", self.choose_login, 0, lambda: sublime_print(MSG["cancel"])
+            "Connection port", SSH_PORT, self.choose_login, 0, lambda: sublime_print(MSG["cancel"])
         )
 
     def choose_login(self, session_port):
