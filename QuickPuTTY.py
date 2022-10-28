@@ -4,7 +4,9 @@
 # └───────────────────────────────────────────┘
 
 from re import match as re_match, sub as re_sub
+from typing import Callable, Union, List
 from json import dump as json_dump
+from dataclasses import dataclass
 from subprocess import Popen
 from copy import deepcopy
 from time import sleep
@@ -29,7 +31,7 @@ SSH_HOST = "127.0.0.1"
 SSH_PORT = 22
 
 
-def mkpath(*paths):
+def mkpath(*paths: List[str]) -> str:
     """Combine paths and normalize the result"""
     return os.path.normpath(os.path.join(*paths))
 
@@ -40,22 +42,35 @@ SESSIONS_PATH = mkpath(USER_PACKAGE_PATH, "sessions.json")
 MENU_PATH = mkpath(USER_PACKAGE_PATH, "Main.sublime-menu")
 
 
-def sublime_assert(expression, error_message=None):
+def sublime_assert(expression: bool, error_message=None) -> bool:
     """Replace Python's "assert" keyword"""
     if expression is False:
         sublime.error_message(error_message or MSG["assertion_failed"])
     return expression
 
 
-def sublime_print(string):
+def sublime_print(message: str) -> None:
     if DEBUG_MODE:
-        print(string)
-    sublime.status_message(string)
+        print(message)
+    sublime.status_message(message)
 
+
+def sublime_cancel() -> None:
+    sublime_print(MSG["cancel"])
+
+
+@dataclass
+class Session():
+    name: str
+    host: str
+    port: int
+    login: str
+    password: str
 
 # =============================================================================================================
 
-def get_settings():
+
+def get_settings() -> dict:
     """Check whether the format of the settings is correct. Return settings object or None"""
     settings = sublime.load_settings(f"{PACKAGE_NAME}.sublime-settings")
 
@@ -91,12 +106,12 @@ def get_settings():
     return settings
 
 
-def reload_settings():
+def reload_settings() -> None:
     # get_settings()  # Currently not needed because there is the same check in reload_sessions
     reload_sessions()
 
 
-def check_sessions(sessions):
+def check_sessions(sessions: List[Session]) -> bool:
     """Check whether the format of the sessions is correct (recursive). Return True/False"""
     if not sublime_assert(isinstance(sessions, list), MSG["invalid_sessions"]):
         return False
@@ -130,7 +145,7 @@ def check_sessions(sessions):
     return True
 
 
-def update_sesions(sessions):
+def update_sesions(sessions: List[Session]) -> None:
     """Store sessions to "sessions.json" and create a .sublime-menu file"""
 
     def build(item):
@@ -181,7 +196,7 @@ def update_sesions(sessions):
     sublime_print(MSG["sessions_reloaded"])
 
 
-def reload_sessions():
+def reload_sessions() -> None:
     # Renewing sessions storage file
     sessions = None
     if os.path.isfile(SESSIONS_PATH):
@@ -205,7 +220,7 @@ def reload_sessions():
 class QuickputtyOpen(sublime_plugin.WindowCommand):
     """Responsible for opening PuTTY"""
 
-    def run(self, host=None, port=22, login="", password=""):
+    def run(self, host: str = None, port: Union[str, int] = 22, login: str = "", password: str = ""):
         run_command = get_settings().get("PuTTY_exec")
 
         if host is not None:
@@ -228,38 +243,35 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
     def run(self):
         with open(SESSIONS_PATH, encoding="utf-8") as file:
             try:
-                self.sessions = sublime.decode_value(file.read())  # Note: the result can also be None
+                self.sessions = sublime.decode_value(file.read()) or []
             except Exception:
                 sublime.error_message(MSG["invalid_sessions_json"])
                 return
 
-        if self.sessions is None:
-            self.sessions = []
-
         if not check_sessions(self.sessions):
-            sublime_print(MSG["canel"])
+            sublime_cancel()
             return
-
-        self.new_session = {}  # Creating storage for new session
 
         self.window.show_quick_panel(("Session", "Folder"), self.choose_type)
 
-    def choose_type(self, index):
-        if index == -1:  # Nothing is selected
-            sublime_print(MSG["cancel"])
+    def choose_type(self, qpanel_index: int):
+        if qpanel_index == -1:  # Nothing is selected
+            sublime_cancel()
             return
 
-        self.choose_location(self.window.show_input_panel, (
-            "Folder name" if index else "Session name",
-            "",
-            self.save_folder if index else self.choose_host,
-            0,
-            lambda: sublime_print(MSG["cancel"])
-        ))
+        if qpanel_index:
+            self.choose_location(self.window.show_input_panel, (
+                "Folder name", "", self.save_folder, 0, sublime_cancel
+            ))
+        else:
+            self.new_session = {}  # Creating storage for new session
+            self.choose_location(self.window.show_input_panel, (
+                "Session name", "", self.choose_host, 0, sublime_cancel
+            ))
 
-    def save_folder(self, folder_name):
+    def save_folder(self, folder_name: str):
         if not folder_name.strip():
-            sublime_print(MSG["cancel"])
+            sublime_cancel()
             return
 
         sublime_print(MSG["folder_created"].format(
@@ -274,7 +286,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         update_sesions(self.sessions)
 
-    def choose_location(self, callback, args):
+    def choose_location(self, callback: Callable, args: tuple):
         self.cur_options = self.sessions
         self.cur_location_path = []
 
@@ -282,7 +294,7 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         def choose(index):
             if index == -1:  # Nothing is selected
-                sublime_print(MSG["cancel"])
+                sublime_cancel()
                 return
 
             if index == 1:  # Click on "<HERE>"
@@ -308,9 +320,9 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         choose(0)
 
-    def choose_host(self, session_name):
+    def choose_host(self, session_name: str):
         if not session_name.strip():
-            sublime_print(MSG["cancel"])
+            sublime_cancel()
             return
 
         if session_name in (item["name"] for item in self.cur_options):
@@ -321,17 +333,17 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             #     "",
             #     self.save_folder if index else self.choose_host,
             #     0,
-            #     lambda: sublime_print(MSG["cancel"])
+            #     sublime_cancel
             # ))
 
         self.new_session["name"] = session_name
         self.window.show_input_panel(
-            "Server host", SSH_HOST, self.choose_port, 0, lambda: sublime_print(MSG["cancel"])
+            "Server host", SSH_HOST, self.choose_port, 0, sublime_cancel
         )
 
-    def choose_port(self, session_host):
+    def choose_port(self, session_host: str):
         if not session_host.strip():
-            sublime_print(MSG["cancel"])
+            sublime_cancel()
             return
 
         # IPv4 is recognized:
@@ -341,10 +353,10 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
 
         self.new_session["host"] = session_host
         self.window.show_input_panel(
-            "Connection port", SSH_PORT, self.choose_login, 0, lambda: sublime_print(MSG["cancel"])
+            "Connection port", SSH_PORT, self.choose_login, 0, sublime_cancel
         )
 
-    def choose_login(self, session_port):
+    def choose_login(self, session_port: str):
         try:
             session_port = int(session_port)
             port_valid = (session_port >= 0)
@@ -353,23 +365,23 @@ class QuickputtyNew(sublime_plugin.WindowCommand):
             port_valid = False
 
         if not sublime_assert(port_valid, MSG["wrong_port"]):
-            sublime_print(MSG["cancel"])
+            sublime_cancel()
             return
 
         self.new_session["port"] = session_port
         self.window.show_input_panel(
-            "Username (optional)", "", self.choose_password, 0, lambda: sublime_print(MSG["cancel"])
+            "Username (optional)", "", self.choose_password, 0, sublime_cancel
         )
 
-    def choose_password(self, session_login):
+    def choose_password(self, session_login: str):
         if session_login.strip():
             self.new_session["login"] = session_login.strip()
 
         self.window.show_input_panel(
-            "Password (optional)", "", self.save_session, 0, lambda: sublime_print(MSG["cancel"])
+            "Password (optional)", "", self.save_session, 0, sublime_cancel
         )
 
-    def save_session(self, session_password):
+    def save_session(self, session_password: str):
         if session_password.strip():
             self.new_session["password"] = session_password.strip()
 
@@ -399,7 +411,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
             self.sessions = []
 
         if not check_sessions(self.sessions):
-            sublime_print(MSG["canel"])
+            sublime_cancel()
             return
 
         if not self.sessions:
@@ -415,7 +427,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
 
         def choose(index):
             if index == -1:
-                sublime_print(MSG["cancel"])
+                sublime_cancel()
                 return
 
             if index >= 0:
@@ -440,7 +452,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                         update_sesions(self.sessions)
 
                     else:
-                        sublime_print(MSG["cancel"])
+                        sublime_cancel()
 
                     return
 
@@ -457,7 +469,7 @@ class QuickputtyRemove(sublime_plugin.WindowCommand):
                         update_sesions(self.sessions)
 
                     else:
-                        sublime_print(MSG["cancel"])
+                        sublime_cancel()
 
                     return
 
