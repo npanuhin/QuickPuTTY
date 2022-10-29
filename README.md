@@ -93,7 +93,7 @@ flake8 --show-source --statistics
 
 # Pre-commit hook:
 pip install -U pre-commit
-pre-commit install
+pre-commit install --config ".github/.pre-commit-config.yaml"
 ```
 
 -------------------------------------------
