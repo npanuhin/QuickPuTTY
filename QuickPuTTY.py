@@ -492,10 +492,10 @@ class Files(sublime_plugin.EventListener):
     """Controls the behavior of settings file and sessions file and updates the .sublime-menu file"""
 
     # Does not work in sublime-package file. Help wanted. TODO
-    def on_load_async(self, view):
-        """Prevent the user from changing the default settings"""
-        if not EDIT_DEFAULT_SETTINGS and mkpath(view.file_name()) == SETTINGS_PATH:
-            view.set_read_only(True)
+    # def on_load_async(self, view):
+    #     """Prevent the user from changing the default settings"""
+    #     if not EDIT_DEFAULT_SETTINGS and mkpath(view.file_name()) == SETTINGS_PATH:
+    #         view.set_read_only(True)
 
     def on_post_save_async(self, view):
         if mkpath(view.file_name()) == SESSIONS_PATH:

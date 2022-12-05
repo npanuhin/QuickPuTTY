@@ -83,15 +83,15 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 ## Development
 
 #### Python modules
-```console
+```bash
 pip install -U -r src/requirements.txt
 ```
 
 #### Code linting
-```console
+```bash
 flake8 --show-source --statistics
 
-# Pre-commit hook:
+# To install pre-commit hook:
 pip install -U pre-commit
 pre-commit install --config ".github/.pre-commit-config.yaml"
 ```
