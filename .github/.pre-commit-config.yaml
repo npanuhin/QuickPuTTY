@@ -12,11 +12,13 @@ repos:
     hooks:
     - id: flake8
       additional_dependencies:
+        - darglint
         - dlint
-        - pep8-naming
-        - flake8-pie
+        - flake8-bugbear
         - flake8-builtins
-        - flake8-simplify
+        - flake8-comprehensions
         - flake8-docstrings
         - flake8-import-order
-        - flake8-comprehensions
+        - flake8-pie
+        - flake8-simplify
+        - pep8-naming

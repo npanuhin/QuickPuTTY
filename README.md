@@ -82,13 +82,9 @@ You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit
 
 ## Development
 
-#### Python modules
-```bash
-pip install -U -r src/requirements.txt
-```
-
 #### Code linting
 ```bash
+pip install -U -r ".github/flake8.requirements.txt"
 flake8 --show-source --statistics
 
 # To install pre-commit hook:
