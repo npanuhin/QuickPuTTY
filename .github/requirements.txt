@@ -7,5 +7,5 @@ flake8-comprehensions==3.10
 flake8-docstrings==1.6
 flake8-import-order==0.18
 flake8-pie==0.16
-flake8-simplify==0.19
+flake8-simplify==0.19.3
 pep8-naming==0.13
