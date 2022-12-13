@@ -8,4 +8,4 @@ flake8-docstrings==1.6
 flake8-import-order==0.18
 flake8-pie==0.16
 flake8-simplify==0.19
-pep8-naming==0.13
+pep8-naming==0.13.2
