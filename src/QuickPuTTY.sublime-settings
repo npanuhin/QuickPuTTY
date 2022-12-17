@@ -1,3 +1,5 @@
+// Default settings are not changeable, edit the user-file instead
+
 {
 	// This command is used to run PuTTY (You can specify path to the executable)
 	"PuTTY_exec": "putty",

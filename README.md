@@ -10,12 +10,12 @@
 <div class="badges" align="center">
 	<a href="https://packagecontrol.io/packages/QuickPuTTY" target="_blank" title="Package Control: QuickPuTTY"><img src="https://img.shields.io/badge/WIN-LINUX-f08989?labelColor=99c1f0&style=flat-square&cacheSeconds=260000" alt="WIN|LINUX"></a>
 	<a href="https://packagecontrol.io/packages/QuickPuTTY" target="_blank" title="Package Control: QuickPuTTY"><img src="https://img.shields.io/packagecontrol/dt/QuickPuTTY?color=success&style=flat-square&cacheSeconds=300"></a>
-	<a href="http://npanuhin.me/license" target="_blank" title="license: MIT"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg?color=informational&style=flat-square&cacheSeconds=260000"></a>
+	<a href="https://npanuhin.me/license" target="_blank" title="license: MIT"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg?color=informational&style=flat-square&cacheSeconds=260000"></a>
 	<br>
 </div>
 
 
-***QuickPuTTY*** is a plugin for [Sublime Text](https://www.sublimetext.com "Visit sublimetext.com") that allows you to save SSH sessions for quick access to them. It will be useful for those who often use SSH.
+***QuickPuTTY*** is a plugin for [Sublime Text](https://sublimetext.com "Visit sublimetext.com") that allows you to save SSH sessions for quick access to them. It will be useful for those who often use SSH.
 
 Supports folders with a unique navigation system, making it easy to add or remove sessions on the go (manual JSON editing is also possible).
 
@@ -53,7 +53,7 @@ After installation, you can find settings and README by going to `Preferences > 
 #### Edit sessions and folders
 
 1. Go to `PuTTY > Manage sessions` in the nav-bar
-2. Edit data
+2. Change the data presented in plain json format
 3. Do not forget to save the file
 
 #### Remove session/folder
@@ -71,14 +71,14 @@ At each stage, you'll see a list of options:
 |         \<HERE\>        | Select this if you want to place session/folder in current location |
 |        {folder_№}       |            Select a folder name to navigate into it                 |
 
--------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
-This plugin was tested in `Sublime Text 4126` on `Windows 10 (21H2) x64` and `Ubuntu 18.04.03`.
+This plugin was tested in `Sublime Text 4143` on `Windows 10 (22H2)` and `Ubuntu 20.04.5` (iOS support coming soon).
 If you find a bug, mistake, or typo, you are very welcome to open a [new GitHub issue](https://github.com/npanuhin/QuickPuTTY/issues/new "Create a new GitHub Issue in the QuickPuTTY repository") or contact me directly (e.g., on [npanuhin.me](https://npanuhin.me "Visit npanuhin.me")).
 
 You can find the latest version of PuTTY on [putty.org](https://putty.org "Visit putty.org")
 
--------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 ## Development
 
@@ -92,8 +92,11 @@ pip install -U pre-commit
 pre-commit install --config ".github/.pre-commit-config.yaml"
 ```
 
--------------------------------------------
+#### TODO
+- "Do not forget to save the file" — add autosave
+- JSON -> TOML (or other language with less "control characters")
+- Test on iOS
 
-Copyright © 2022 Nikita Paniukhin
+------------------------------------------------------------------------------------------------------------------------
 
-License: [MIT](http://npanuhin.me/license "Visit https://npanuhin.me/license")
+Copyright © 2022 Nikita Panuhin ([MIT](https://npanuhin.me/license "Visit https://npanuhin.me/license"))

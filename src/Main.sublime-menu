@@ -18,7 +18,7 @@
 						"children":
 						[
 							{
-								"caption": "Show README",
+								"caption": "README",
 								"command": "quickputty_readme"
 							},
 							{
@@ -27,7 +27,7 @@
 								"args":
 								{
 									"base_file": "${packages}/QuickPuTTY/src/QuickPuTTY.sublime-settings",
-									"default": "{\n\t$0\n}\n"
+									"default": "// Here you can duplicate the default settings and edit them as you wish\n\n{\n\t$0\n}\n"
 								}
 							}
 						]

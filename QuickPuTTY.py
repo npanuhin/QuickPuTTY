@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from re import match as re_match
 from subprocess import Popen
 from copy import deepcopy
+from pathlib import Path
 from time import sleep
 import os
 
@@ -20,7 +21,7 @@ PACKAGE_NAME = "QuickPuTTY"
 
 # If you want to edit default settings:  (!!! Does not work in sublime-package file. Help wanted !!!)
 # TODO: Preventing the user from changing the default settings (in .sublime-package file)
-EDIT_DEFAULT_SETTINGS = False
+# EDIT_DEFAULT_SETTINGS = False
 
 # IPV4_REGEX is used to prettify IP addresses, optional enhancement
 IPV4_REGEX = r"(?:https?:?[\/\\]{,2})?(\d+)[\.:,](\d+)[\.:,](\d+)[\.:,](\d+)(?::\d+)?"
@@ -536,8 +537,8 @@ def on_load():
         except FileNotFoundError:
             sleep(0.1)
 
-    try:  # Show README if session file is absent (= package was just installed)
-        # This is because https://packagecontrol.io/docs/events is not working
+    try:  # Show README if session file is absent (package was just installed)
+        # This is because https://packagecontrol.io/docs/events are not working
         sublime.load_resource(f"Packages/User/{PACKAGE_NAME}/sessions.json")
     except FileNotFoundError:
         QuickputtyReadme(sublime.active_window()).run()
@@ -545,7 +546,7 @@ def on_load():
     if get_settings() is None:
         return
 
-    os.makedirs(mkpath(USER_PACKAGE_PATH), exist_ok=True)  # Create folder in "Packages/User"
+    os.makedirs(USER_PACKAGE_PATH, exist_ok=True)  # Create folder in "Packages/User"
     reload_sessions()
 
 
@@ -554,7 +555,5 @@ def plugin_loaded():
 
 
 def plugin_unloaded():
-    get_settings().clear_on_change("update_settings")  # Disable `settings check on save`
-
-    if os.path.exists(MENU_PATH):  # Remove active menu file
-        os.remove(MENU_PATH)
+    get_settings().clear_on_change("update_settings")  # Disable settings check on save
+    Path(MENU_PATH).unlink(missing_ok=True)  # Remove active menu file
