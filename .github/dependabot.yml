@@ -5,10 +5,10 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pip"
-    directory: "/.github"
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+  # - package-ecosystem: "pip"
+  #   directory: "/.github"
+  #   schedule:
+  #     interval: "weekly"
+  #   ignore:
+  #     - dependency-name: "*"
+  #       update-types: ["version-update:semver-minor", "version-update:semver-patch"]
