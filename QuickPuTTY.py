@@ -1,8 +1,3 @@
-# ┌───────────────────────────────────────────┐
-# │ Copyright (c) 2020-2022 Nikita Paniukhin  │
-# │      Licensed under the MIT license       │
-# └───────────────────────────────────────────┘
-
 from typing import Callable, Union, List, Dict, Optional
 from json import dump as json_dump
 from dataclasses import dataclass

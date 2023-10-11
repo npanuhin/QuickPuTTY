@@ -1,10 +1,3 @@
-<!--
-┌───────────────────────────────────────────┐
-│ Copyright (c) 2020-2022 Nikita Paniukhin  │
-│      Licensed under the MIT license       │
-└───────────────────────────────────────────┘
--->
-
 <h1 align="center">QuickPuTTY</h1>
 
 <div class="badges" align="center">
@@ -99,4 +92,4 @@ pre-commit install --config ".github/.pre-commit-config.yaml"
 
 ------------------------------------------------------------------------------------------------------------------------
 
-Copyright © 2022 Nikita Panuhin ([MIT](https://npanuhin.me/license "Visit https://npanuhin.me/license"))
+Copyright © 2023 Nikita Panuhin ([MIT](https://npanuhin.me/license "Visit https://npanuhin.me/license"))
