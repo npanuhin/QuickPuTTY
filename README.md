@@ -7,6 +7,12 @@
 	<br>
 </div>
 
+<br>
+
+> <h3 align="center">🚧 Unfortunately, this plugin has reached the end of its life 😔</h3>
+>
+> The current version in the `master` branch requires a lot of fixing and refactoring (and is simply broken), so I can't just post it, although I really wanted to update the version before archiving the project
+
 
 ***QuickPuTTY*** is a plugin for [Sublime Text](https://sublimetext.com "Visit sublimetext.com") that allows you to save SSH sessions for quick access to them. It will be useful for those who often use SSH.
 
